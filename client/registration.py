@@ -1,4 +1,5 @@
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QMessageBox, QHBoxLayout, QSpacerItem, QSizePolicy
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QMessageBox, QHBoxLayout, QSpacerItem, QSizePolicy, QCheckBox
+from PyQt6.QtCore import Qt
 from client.main_elements import Customer, User, main_functions
 
 class RegisterWindow(QWidget):
@@ -8,7 +9,7 @@ class RegisterWindow(QWidget):
         self.login_window = login_window
 
         self.setWindowTitle("Регистрация")
-        self.setFixedSize(300, 200)
+        self.setFixedSize(300, 250)
 
         layout = QVBoxLayout()
 
@@ -21,6 +22,9 @@ class RegisterWindow(QWidget):
 
         self.label_email = QLabel("Электронная почта:")
         self.lineEdit_email = QLineEdit(self)
+        
+        self.show_password_checkbox = QCheckBox("Показать пароль", self)
+        self.show_password_checkbox.stateChanged.connect(self.toggle_password_visibility)
 
         layout.addWidget(self.label_login)
         layout.addWidget(self.lineEdit_login)
@@ -28,7 +32,8 @@ class RegisterWindow(QWidget):
         layout.addWidget(self.lineEdit_password)
         layout.addWidget(self.label_email)
         layout.addWidget(self.lineEdit_email)
-
+        layout.addWidget(self.show_password_checkbox)
+        
         # Промежуток между виджетами
         layout.addSpacing(10)
 
@@ -53,6 +58,12 @@ class RegisterWindow(QWidget):
         # Отображение окна по центру экрана
         self.center()
 
+    def toggle_password_visibility(self, state):
+        if state == Qt.CheckState.Checked.value:
+            self.lineEdit_password.setEchoMode(QLineEdit.EchoMode.Normal)
+        else:
+            self.lineEdit_password.setEchoMode(QLineEdit.EchoMode.Password)
+
     def register_account(self):
         if len(self.lineEdit_login.text()) > 5 and len(self.lineEdit_password.text()) > 7:
             if main_functions.check_login_user(User(login = self.lineEdit_login.text(), password = self.lineEdit_password.text())) == None:
@@ -72,8 +83,8 @@ class RegisterWindow(QWidget):
 
         
     def cancel_registration(self):
-        self.close()  # Закрываем окно регистрации
-        self.login_window.show()  # Показываем окно авторизации
+        self.close()  
+        self.login_window.show()
 
     def center(self):
         # Получаем размеры экрана

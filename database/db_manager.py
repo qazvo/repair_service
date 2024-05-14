@@ -1,7 +1,7 @@
 import sqlite3
 import os
 
-DB_PATH = "D:/Program/Programing/Projects/repair_service/database/repair_service.db"
+DB_PATH = os.path.join(os.path.dirname(__file__), 'repair_service.db')
  
 class DBManager:
     def __init__(self, default_path: str) -> None:

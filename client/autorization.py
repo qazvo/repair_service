@@ -1,7 +1,8 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QMessageBox, QHBoxLayout, QSpacerItem, QSizePolicy
 from client.main_elements import Customer, User, main_functions
 from client.registration import RegisterWindow
-from client.mainwindows import CustomerWindow, MasterWindow, AdminWindow, ManagerWindow
+from client.adminpanel import AdminWindow
+from client.masterpanel import CustomerWindow, MasterWindow, ManagerWindow
 
 class LoginWindow(QMainWindow):
     def __init__(self):
@@ -10,7 +11,7 @@ class LoginWindow(QMainWindow):
         self.mainfunctions = main_functions
 
         self.setWindowTitle("Авторизация")
-        self.setFixedSize(300, 150)  # Фиксированный размер окна
+        self.setFixedSize(300, 150)
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -70,13 +71,13 @@ class LoginWindow(QMainWindow):
                 # Администратор
                 self.admin_window = AdminWindow()
                 self.admin_window.show()
-            self.hide()  # Скрываем окно авторизации после успешного входа
+            self.hide()
         else:
             QMessageBox.information(self, "Провал", "Неверный логин или пароль!")
 
 
     def open_register_window(self):
-        self.hide()  # Скрываем окно авторизации
+        self.hide()
         self.register_window = RegisterWindow(self)
         self.register_window.show()
 

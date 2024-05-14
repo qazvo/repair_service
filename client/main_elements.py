@@ -24,9 +24,9 @@ class MainFunctions:
         self.db_manager = db_manager
 
     def login(self, user: User) -> tuple:
-        result = db_manager.execute("""SELECT * FROM users WHERE login = ? AND password = ?""", args=(user.login, user.password))
+        result = db_manager.execute("""SELECT id, type_id FROM users WHERE login = ? AND password = ?""", args=(user.login, user.password))
         if result["data"]:
-            return User(id = result["data"][0], type_id = result["data"][3])
+            return User(id = result["data"][0], type_id = result["data"][1])
         
     def check_login_user(self, user: User) -> tuple:
         result = db_manager.execute("""SELECT id FROM users WHERE login = ?""", args= (user.login,))
@@ -38,10 +38,33 @@ class MainFunctions:
         if result["data"]:
             return result["data"][0]
 
-    def register(self, user: User, customer: Customer) -> tuple:
+    def register(self, user: User, customer: Customer):
         result = db_manager.execute("""INSERT INTO users (login, password, type_id) VALUES (?, ?, 4)""", args = (user.login, user.password))
         for_user_id = db_manager.execute("""SELECT id FROM users WHERE login == ?""", args = (user.login,))
         db_manager.execute("""INSERT INTO customers (email, user_id) VALUES (?, ?)""", args = (customer.email, for_user_id["data"][0]))
         return result["code"]
     
+    def load_user_data(self) -> tuple:
+        result = db_manager.execute("""SELECT id, login, password, type_id FROM users""", many=True)
+        return result
+    
+    def delete_user(self, user: User):
+        result = db_manager.execute("""DELETE FROM users WHERE id = ?""", args= (user.id,))
+        return result["code"]
+    
+    def load_roles(self) -> tuple:
+        result = db_manager.execute("""SELECT name FROM types_users""", many= True)
+        return result
+    
+    def role_definition(self, user: User) -> int:
+        result = db_manager.execute("""SELECT id FROM types_users WHERE name = ?""", args= (user.type_id,))
+        return result["data"][0]
+    
+    def update_user(self, user: User):
+        result = db_manager.execute("""UPDATE users SET login = ?, password = ?, type_id = ? WHERE id = ?""", args= (user.login, user.password, user.type_id, user.id))
+        return result["code"]
+    
+    def add_user(self, user: User):
+        result = db_manager.execute("""INSERT INTO users (login, password, type_id) VALUES (?, ?, ?)""", args= (user.login, user.password, user.type_id))
+        return result["code"]
 main_functions = MainFunctions(db_manager)
