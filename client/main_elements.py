@@ -23,7 +23,7 @@ class MainFunctions:
     def __init__(self, db_manager):
         self.db_manager = db_manager
 
-    def login(self, user: User):
+    def login(self, user: User) -> tuple:
         result = db_manager.execute("""SELECT * FROM users WHERE login = ? AND password = ?""", args=(user.login, user.password))
         if result["data"]:
             return User(id = result["data"][0], type_id = result["data"][3])
@@ -38,10 +38,10 @@ class MainFunctions:
         if result["data"]:
             return result["data"][0]
 
-    def register(self, user: User, customer: Customer):
+    def register(self, user: User, customer: Customer) -> tuple:
         result = db_manager.execute("""INSERT INTO users (login, password, type_id) VALUES (?, ?, 4)""", args = (user.login, user.password))
-        db_manager.execute("""INSERT INTO customers (email) VALUES (?)""", args = (customer.email,))
-        db_manager.execute("""INSERT INTO connector_user_customer (user_id, customer_id) VALUES (?, ?)""", args = (self.check_login_user(user), self.check_email_customer(customer)))
+        for_user_id = db_manager.execute("""SELECT id FROM users WHERE login == ?""", args = (user.login,))
+        db_manager.execute("""INSERT INTO customers (email, user_id) VALUES (?, ?)""", args = (customer.email, for_user_id["data"][0]))
         return result["code"]
     
 main_functions = MainFunctions(db_manager)

@@ -8,7 +8,7 @@ class RegisterWindow(QWidget):
         self.login_window = login_window
 
         self.setWindowTitle("Регистрация")
-        self.setFixedSize(300, 200)  # Фиксированный размер окна
+        self.setFixedSize(300, 200)
 
         layout = QVBoxLayout()
 

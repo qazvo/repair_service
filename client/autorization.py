@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QMessageBox, QHBoxLayout, QSpacerItem, QSizePolicy
 from client.main_elements import Customer, User, main_functions
 from client.registration import RegisterWindow
+from client.mainwindows import CustomerWindow, MasterWindow, AdminWindow, ManagerWindow
 
 class LoginWindow(QMainWindow):
     def __init__(self):
@@ -51,18 +52,28 @@ class LoginWindow(QMainWindow):
         self.center()
 
     def login(self):
-        user = self.mainfunctions.login(User(login = self.lineEdit_username.text(), password = self.lineEdit_password.text()))
+        user = self.mainfunctions.login(User(login=self.lineEdit_username.text(), password=self.lineEdit_password.text()))
         if user:
             if user.type_id == 4:
-                QMessageBox.information(self, "Успех", "Вы вошли в аккаунт!")
+                # Клиент
+                self.customer_window = CustomerWindow()
+                self.customer_window.show()
             elif user.type_id == 3:
-                QMessageBox.information(self, "Успех", "Вы вошли в аккаунт!")
+                # Менеджер по заявкам
+                self.manager_window = ManagerWindow()
+                self.manager_window.show()
             elif user.type_id == 2:
-                QMessageBox.information(self, "Успех", "Вы вошли в аккаунт!")
+                # Мастер по ремонту
+                self.master_window = MasterWindow()
+                self.master_window.show()
             elif user.type_id == 1:
-                QMessageBox.information(self, "Успех", "Вы вошли в аккаунт!")
-        else: 
+                # Администратор
+                self.admin_window = AdminWindow()
+                self.admin_window.show()
+            self.hide()  # Скрываем окно авторизации после успешного входа
+        else:
             QMessageBox.information(self, "Провал", "Неверный логин или пароль!")
+
 
     def open_register_window(self):
         self.hide()  # Скрываем окно авторизации

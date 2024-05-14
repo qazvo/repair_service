@@ -20,7 +20,8 @@ CREATE TABLE customers (
     FIO VARCHAR(255),
     adress VARCHAR(255),
     number_phone VARCHAR(20),
-    email VARCHAR(255)
+    email VARCHAR(255),
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE posts (
@@ -77,9 +78,4 @@ CREATE TABLE tools (
 CREATE TABLE tools_used (
     contract_id INTEGER REFERENCES contracts(id) ON DELETE CASCADE ON UPDATE CASCADE,
     tool_id INTEGER REFERENCES tools(id) ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-CREATE TABLE connector_user_customer(
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    customer_id INTEGER REFERENCES customers(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
