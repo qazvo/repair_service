@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QMessageBox, QHBoxLayout, QSpacerItem, QSizePolicy
-from client.main_elements import Customer, User, main_functions
+from PyQt6.QtGui import QIcon
+from client.main_elements import User, main_functions
 from client.registration import RegisterWindow
 from client.adminpanel import AdminWindow
 from client.masterpanel import CustomerWindow, MasterWindow, ManagerWindow
@@ -12,6 +13,7 @@ class LoginWindow(QMainWindow):
 
         self.setWindowTitle("Авторизация")
         self.setFixedSize(300, 150)
+        self.setWindowIcon(QIcon('img/logo.png'))
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)

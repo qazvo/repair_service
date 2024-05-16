@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QMessageBox, QHBoxLayout, QSpacerItem, QSizePolicy, QCheckBox
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QIcon
 from client.main_elements import Customer, User, main_functions
 
 class RegisterWindow(QWidget):
@@ -10,6 +11,7 @@ class RegisterWindow(QWidget):
 
         self.setWindowTitle("Регистрация")
         self.setFixedSize(300, 250)
+        self.setWindowIcon(QIcon('img/logo.png'))
 
         layout = QVBoxLayout()
 

@@ -2,8 +2,9 @@ from PyQt6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QTableView, QPushButton, QHBoxLayout, QMessageBox,
     QGroupBox, QHeaderView, QSpacerItem, QSizePolicy, QDialog, QLabel, QLineEdit, QComboBox
 )
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QStandardItemModel, QStandardItem, QIcon
-from client.main_elements import User, main_functions
+from client.main_elements import User, main_functions, TypeUser
 from database.db_manager import db_manager
 
 class AdminWindow(QWidget):
@@ -12,6 +13,7 @@ class AdminWindow(QWidget):
 
         self.setWindowTitle("Admin Panel")
         self.setFixedSize(800, 600)
+        self.setWindowIcon(QIcon('img/logo.png'))
 
         self.table_view = QTableView()
         self.table_model = QStandardItemModel()
@@ -27,25 +29,30 @@ class AdminWindow(QWidget):
         self.load_user_data()
 
         self.button_add_user = QPushButton("Add User")
-        self.button_add_user.setIcon(QIcon("icons/add.png"))
+        self.button_add_user.setIcon(QIcon("img/add.png"))
         self.button_edit_user = QPushButton("Edit User")
-        self.button_edit_user.setIcon(QIcon("icons/edit.png"))
+        self.button_edit_user.setIcon(QIcon("img/edit.png"))
         self.button_delete_user = QPushButton("Delete User")
-        self.button_delete_user.setIcon(QIcon("icons/delete.png"))
+        self.button_delete_user.setIcon(QIcon("img/delete.png"))
+        self.button_refresh = QPushButton("Refresh Data")
+        self.button_refresh.setIcon(QIcon("img/refresh.png"))
 
         self.button_add_user.clicked.connect(self.add_user)
         self.button_edit_user.clicked.connect(self.edit_user)
         self.button_delete_user.clicked.connect(self.delete_user)
+        self.button_refresh.clicked.connect(self.load_user_data)
 
         # Создаем компоновку для кнопок
         button_layout = QHBoxLayout()
+
         button_layout.addWidget(self.button_add_user)
         button_layout.addWidget(self.button_edit_user)
         button_layout.addWidget(self.button_delete_user)
 
-        # Промежуток между кнопками и таблицей
         button_layout.addSpacerItem(QSpacerItem(20, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
-
+        
+        button_layout.addWidget(self.button_refresh, alignment=Qt.AlignmentFlag.AlignRight)
+    
         # Создаем групповой блок для управления пользователями
         group_box = QGroupBox("User Management")
         group_box_layout = QVBoxLayout()
@@ -176,7 +183,7 @@ class EditUserWindow(QDialog):
             return
         
         # Определяем роль в виде числового значения
-        role_id = main_functions.role_definition(User(type_id = self.comboBox_role.currentText()))
+        role_id = main_functions.role_definition(TypeUser(name = self.comboBox_role.currentText()))
         # Обновляем данные пользователя в базе данных
         result = main_functions.update_user(User(id = self.user_id, login = login, password = password, type_id = role_id))
         if result == 200:
@@ -256,7 +263,7 @@ class AddUserWindow(QDialog):
             return
 
         # Определяем роль в виде числового значения
-        role_id = main_functions.role_definition(User(type_id = self.comboBox_role.currentText()))
+        role_id = main_functions.role_definition(TypeUser(name = self.comboBox_role.currentText()))
         # Добавляем нового пользователя в базу данных
         result = main_functions.add_user(User(login= login, password= password, type_id= role_id))
         if result == 200:

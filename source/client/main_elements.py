@@ -9,6 +9,7 @@ class User:
         self.type_id = type_id
     def to_json(self):
         return f'{{"id": "{self.id}""login": "{self.login}", "password": "{self.password}", "type_id": {self.type_id}}}'
+    
 class Customer:
     def __init__(self, id: int = None, FIO: str = None,  adress: str = None, number_phone: int = None, email: int = None):
         self.id = id
@@ -18,6 +19,13 @@ class Customer:
         self.email = email
     def to_json(self):
         return f'{{"id": "{self.id}""FIO": "{self.FIO}", "adress": "{self.adress}", "number_phone": {self.number_phone}, "email": {self.email}}}'
+    
+class TypeUser:
+    def __init__(self, id: int = None, name: str = None):
+        self.id = id
+        self.name = name
+    def to_json(self):
+        return f'{{"id": "{self.id}""name": "{self.name}"}}'
 
 class MainFunctions:
     def __init__(self, db_manager):
@@ -45,7 +53,7 @@ class MainFunctions:
         return result["code"]
     
     def load_user_data(self) -> tuple:
-        result = db_manager.execute("""SELECT id, login, password, type_id FROM users""", many=True)
+        result = db_manager.execute("""SELECT users.id, users.login, users.password, types_users.name FROM users JOIN types_users ON users.type_id = types_users.id""", many=True)
         return result
     
     def delete_user(self, user: User):
@@ -56,8 +64,8 @@ class MainFunctions:
         result = db_manager.execute("""SELECT name FROM types_users""", many= True)
         return result
     
-    def role_definition(self, user: User) -> int:
-        result = db_manager.execute("""SELECT id FROM types_users WHERE name = ?""", args= (user.type_id,))
+    def role_definition(self, typeuser: TypeUser) -> int:
+        result = db_manager.execute("""SELECT id FROM types_users WHERE name = ?""", args= (typeuser.name,))
         return result["data"][0]
     
     def update_user(self, user: User):
