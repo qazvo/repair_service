@@ -1,15 +1,14 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QMessageBox, QHBoxLayout, QSpacerItem, QSizePolicy
 from PyQt6.QtGui import QIcon
-from client.main_elements import User, main_functions
+from client.main_elements import User, main_functions, Customer
 from client.registration import RegisterWindow
 from client.adminpanel import AdminWindow
-from client.masterpanel import CustomerWindow, MasterWindow, ManagerWindow
+from client.masterpanel import MasterWindow, ManagerWindow
+from client.customerpanel import InformationAboutCustomer, CustomerWindow
 
 class LoginWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-
-        self.mainfunctions = main_functions
 
         self.setWindowTitle("Авторизация")
         self.setFixedSize(300, 150)
@@ -55,12 +54,17 @@ class LoginWindow(QMainWindow):
         self.center()
 
     def login(self):
-        user = self.mainfunctions.login(User(login=self.lineEdit_username.text(), password=self.lineEdit_password.text()))
+        user = main_functions.login(User(login=self.lineEdit_username.text(), password=self.lineEdit_password.text()))
         if user:
             if user.type_id == 4:
                 # Клиент
-                self.customer_window = CustomerWindow()
-                self.customer_window.show()
+                customer_id = main_functions.client_definition(User(id = user.id))
+                if main_functions.is_user_already_registered(Customer(id = customer_id)):
+                    self.customer_window = CustomerWindow(customer_id)
+                    self.customer_window.show()  
+                else: 
+                    self.information_about_customer = InformationAboutCustomer(customer_id)
+                    self.information_about_customer.show() 
             elif user.type_id == 3:
                 # Менеджер по заявкам
                 self.manager_window = ManagerWindow()
@@ -73,7 +77,7 @@ class LoginWindow(QMainWindow):
                 # Администратор
                 self.admin_window = AdminWindow()
                 self.admin_window.show()
-            self.hide()
+            self.close()
         else:
             QMessageBox.information(self, "Провал", "Неверный логин или пароль!")
 

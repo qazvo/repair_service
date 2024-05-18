@@ -11,10 +11,10 @@ class User:
         return f'{{"id": "{self.id}""login": "{self.login}", "password": "{self.password}", "type_id": {self.type_id}}}'
     
 class Customer:
-    def __init__(self, id: int = None, FIO: str = None,  adress: str = None, number_phone: int = None, email: int = None):
+    def __init__(self, id: int = None, FIO: str = None,  address: str = None, number_phone: int = None, email: int = None):
         self.id = id
         self.FIO = FIO
-        self.adress = adress
+        self.address = address
         self.number_phone = number_phone
         self.email = email
     def to_json(self):
@@ -75,4 +75,20 @@ class MainFunctions:
     def add_user(self, user: User):
         result = db_manager.execute("""INSERT INTO users (login, password, type_id) VALUES (?, ?, ?)""", args= (user.login, user.password, user.type_id))
         return result["code"]
+    
+    def client_definition(self, user: User):
+        result = db_manager.execute("""SELECT id FROM customers WHERE user_id = ?""", args= (user.id,))
+        return result["data"][0]
+    
+    def is_user_already_registered(self, customer:  Customer):
+        result = db_manager.execute("""SELECT FIO, address, number_phone FROM customers WHERE id = ?""", args= (customer.id,))
+        fio, address, phone = result["data"]
+        if fio and address and phone:
+            return True
+        return False
+    
+    def update_customer(self, customer: Customer):
+        result = db_manager.execute("""UPDATE customers SET FIO = ?, address = ?, number_phone = ? WHERE id = ?""", args= (customer.FIO, customer.address, customer.number_phone, customer.id))
+        return result["code"]
+    
 main_functions = MainFunctions(db_manager)

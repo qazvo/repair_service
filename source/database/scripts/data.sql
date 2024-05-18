@@ -14,3 +14,9 @@ INSERT INTO users (login, password, type_id) VALUES ('client', 'client_password'
 INSERT INTO statuses (name) VALUES ('В ожидании');
 INSERT INTO statuses (name) VALUES ('В работе');
 INSERT INTO statuses (name) VALUES ('Выполнено');
+
+-- Добавление инструментария
+INSERT INTO tools (name) VALUES ('Паяльная станция');
+INSERT INTO tools (name) VALUES ('None');
+INSERT INTO tools (name) VALUES ('None');
+INSERT INTO tools (name) VALUES ('NoNN');

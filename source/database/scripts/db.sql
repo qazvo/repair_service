@@ -18,7 +18,7 @@ CREATE TABLE devices (
 CREATE TABLE customers (
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     FIO VARCHAR(255),
-    adress VARCHAR(255),
+    address VARCHAR(255),
     number_phone VARCHAR(20),
     email VARCHAR(255),
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE

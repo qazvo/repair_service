@@ -5,13 +5,12 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QStandardItemModel, QStandardItem, QIcon
 from client.main_elements import User, main_functions, TypeUser
-from database.db_manager import db_manager
 
 class AdminWindow(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Admin Panel")
+        self.setWindowTitle("Панель администратора")
         self.setFixedSize(800, 600)
         self.setWindowIcon(QIcon('img/logo.png'))
 
@@ -28,13 +27,13 @@ class AdminWindow(QWidget):
         # Загружаем данные пользователей из базы данных
         self.load_user_data()
 
-        self.button_add_user = QPushButton("Add User")
+        self.button_add_user = QPushButton("Добавить")
         self.button_add_user.setIcon(QIcon("img/add.png"))
-        self.button_edit_user = QPushButton("Edit User")
+        self.button_edit_user = QPushButton("Изменить")
         self.button_edit_user.setIcon(QIcon("img/edit.png"))
-        self.button_delete_user = QPushButton("Delete User")
+        self.button_delete_user = QPushButton("Удалить")
         self.button_delete_user.setIcon(QIcon("img/delete.png"))
-        self.button_refresh = QPushButton("Refresh Data")
+        self.button_refresh = QPushButton("")
         self.button_refresh.setIcon(QIcon("img/refresh.png"))
 
         self.button_add_user.clicked.connect(self.add_user)
@@ -54,7 +53,7 @@ class AdminWindow(QWidget):
         button_layout.addWidget(self.button_refresh, alignment=Qt.AlignmentFlag.AlignRight)
     
         # Создаем групповой блок для управления пользователями
-        group_box = QGroupBox("User Management")
+        group_box = QGroupBox("Управление пользователями")
         group_box_layout = QVBoxLayout()
         group_box_layout.addWidget(self.table_view)
         group_box_layout.addLayout(button_layout)
@@ -80,7 +79,7 @@ class AdminWindow(QWidget):
                 row = [QStandardItem(str(data)) for data in user_data]
                 self.table_model.appendRow(row)
         else:
-            QMessageBox.critical(self, "Error", "Failed to load user data.")
+            QMessageBox.critical(self, "Ошибка", "Не удалось загрузить пользователей.")
 
     def add_user(self):
         self.add_user_window = AddUserWindow(self)
@@ -92,24 +91,24 @@ class AdminWindow(QWidget):
             self.edit_user_window = EditUserWindow(self.table_model.item(selected_row, 0).text(), self.table_model.item(selected_row, 1).text(), self.table_model.item(selected_row, 2).text(), self.table_model.item(selected_row, 3).text(), self)
             self.edit_user_window.show()
         else:
-            QMessageBox.warning(self, "Warning", "Please select a user to edit.")
+            QMessageBox.warning(self, "Предупреждение", "Пожалуйста, выберите пользователя.")
 
     def delete_user(self):
         selected_row = self.table_view.selectionModel().currentIndex().row()
         if selected_row >= 0:
             # Показываем диалоговое окно подтверждения удаления
-            confirmation = QMessageBox.question(self, "Delete User", 
-                                                 "Are you sure you want to delete this user?",
+            confirmation = QMessageBox.question(self, "Удаление пользователя", 
+                                                 "Вы уверены, что хотите удалить этого пользователя?",
                                                  QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             if confirmation == QMessageBox.StandardButton.Yes:
                 result = main_functions.delete_user(User(id = self.table_model.item(selected_row, 0).text()))
                 if result == 200:
                     self.load_user_data()
-                    QMessageBox.information(self, "Success", "User successfully deleted.")
+                    QMessageBox.information(self, "Успех", "Пользователь удален!")
                 else:
-                    QMessageBox.critical(self, "Error", "Failed to delete user.")
+                    QMessageBox.critical(self, "Ошибка", "Не удалось удалить пользователя.")
         else:
-            QMessageBox.warning(self, "Warning", "Please select a user to delete.")
+            QMessageBox.warning(self, "Предупреждение", "Пожалуйста, выберите пользователя.")
 
     def center(self):
         # Получаем размеры экрана
@@ -124,18 +123,18 @@ class EditUserWindow(QDialog):
         super().__init__(parent)
 
         self.user_id = user_id
-        self.setWindowTitle("Edit User")
+        self.setWindowTitle("Изменение информации о пользователе")
         self.setFixedSize(300, 200)
 
         layout = QVBoxLayout(self)
 
-        self.label_login = QLabel("Login:")
+        self.label_login = QLabel("Логин:")
         self.lineEdit_login = QLineEdit(login)
 
-        self.label_password = QLabel("Password:")
+        self.label_password = QLabel("Пароль:")
         self.lineEdit_password = QLineEdit(password)
 
-        self.label_role = QLabel("Role:")
+        self.label_role = QLabel("Тип пользователя:")
         self.comboBox_role = QComboBox()
         self.load_roles()
         self.comboBox_role.setCurrentText(role)
@@ -148,8 +147,8 @@ class EditUserWindow(QDialog):
         layout.addWidget(self.comboBox_role)
 
         button_layout = QHBoxLayout()
-        self.button_save = QPushButton("Save")
-        self.button_cancel = QPushButton("Cancel")
+        self.button_save = QPushButton("Сохранить")
+        self.button_cancel = QPushButton("Отмена")
 
         button_layout.addWidget(self.button_save)
         button_layout.addWidget(self.button_cancel)
@@ -168,18 +167,18 @@ class EditUserWindow(QDialog):
             roles = [role[0] for role in result["data"]]
             self.comboBox_role.addItems(roles)
         else:
-            QMessageBox.critical(self, "Error", "Failed to load roles from the database.")
+            QMessageBox.critical(self, "Ошибка", "Не удалось загрузить роли из базы данных.")
 
     def save_user(self):
         login = self.lineEdit_login.text()
         password = self.lineEdit_password.text()
 
         if not login or not password:
-            QMessageBox.warning(self, "Warning", "Login and password cannot be empty.")
+            QMessageBox.warning(self, "Предупреждение", "Логин и пароль не могут быть пустыми.")
             return
         
         if len(login) < 6 or len(password) < 6:
-            QMessageBox.warning(self, "Warning", "Login and password must be at least 6 characters long.")
+            QMessageBox.warning(self, "Предупреждение", "Логин и пароль должны быть длиной не менее 6 символов.")
             return
         
         # Определяем роль в виде числового значения
@@ -188,10 +187,10 @@ class EditUserWindow(QDialog):
         result = main_functions.update_user(User(id = self.user_id, login = login, password = password, type_id = role_id))
         if result == 200:
             self.parent().load_user_data()
-            QMessageBox.information(self, "Success", "User information updated successfully.")
+            QMessageBox.information(self, "Успех", "Информация о пользователе успешно обновлена!")
             self.close()
         else:
-            QMessageBox.critical(self, "Error", "Failed to update user information.")
+            QMessageBox.critical(self, "Ошибка", "Не удалось обновить информацию о пользователе.")
 
     def center(self):
         # Получаем размеры экрана
@@ -205,18 +204,18 @@ class AddUserWindow(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.setWindowTitle("Add User")
+        self.setWindowTitle("Добавление пользователя")
         self.setFixedSize(300, 200)
 
         layout = QVBoxLayout(self)
 
-        self.label_login = QLabel("Login:")
+        self.label_login = QLabel("Логин:")
         self.lineEdit_login = QLineEdit()
 
-        self.label_password = QLabel("Password:")
+        self.label_password = QLabel("Пароль:")
         self.lineEdit_password = QLineEdit()
 
-        self.label_role = QLabel("Role:")
+        self.label_role = QLabel("Тип аккаунта:")
         self.comboBox_role = QComboBox()
         self.load_roles()
 
@@ -228,8 +227,8 @@ class AddUserWindow(QDialog):
         layout.addWidget(self.comboBox_role)
 
         button_layout = QHBoxLayout()
-        self.button_save = QPushButton("Save")
-        self.button_cancel = QPushButton("Cancel")
+        self.button_save = QPushButton("Сохранить")
+        self.button_cancel = QPushButton("Отмена")
 
         button_layout.addWidget(self.button_save)
         button_layout.addWidget(self.button_cancel)
@@ -248,18 +247,18 @@ class AddUserWindow(QDialog):
             roles = [role[0] for role in result["data"]]
             self.comboBox_role.addItems(roles)
         else:
-            QMessageBox.critical(self, "Error", "Failed to load roles from the database.")
+            QMessageBox.critical(self, "Ошибка", "Не удалось загрузить роли из базы данных.")
 
     def save_user(self):
         login = self.lineEdit_login.text()
         password = self.lineEdit_password.text()
 
         if not login or not password:
-            QMessageBox.warning(self, "Warning", "Login and password cannot be empty.")
+            QMessageBox.warning(self, "Предупреждение", "Логин и пароль не могут быть пустыми.")
             return
 
         if len(login) < 6 or len(password) < 6:
-            QMessageBox.warning(self, "Warning", "Login and password must be at least 6 characters long.")
+            QMessageBox.warning(self, "Предупреждение", "Логин и пароль должны быть длиной не менее 6 символов.")
             return
 
         # Определяем роль в виде числового значения
@@ -268,10 +267,10 @@ class AddUserWindow(QDialog):
         result = main_functions.add_user(User(login= login, password= password, type_id= role_id))
         if result == 200:
             self.parent().load_user_data()
-            QMessageBox.information(self, "Success", "New user added successfully.")
+            QMessageBox.information(self, "Успех", "Новый пользователь успешно добавлен!")
             self.close()
         else:
-            QMessageBox.critical(self, "Error", "Failed to add new user.")
+            QMessageBox.critical(self, "Ошибка", "Не удалось добавить нового пользователя.")
 
     def center(self):
         # Получаем размеры экрана
