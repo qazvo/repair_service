@@ -18,8 +18,8 @@ class DBManager:
     def create_base(self, script_tables_path: str, script_data_path: str):
         conn, cur = self.connect_to_db()
         try:
-            cur.executescript(open(script_tables_path).read())
-            cur.executescript(open(script_data_path).read())
+            cur.executescript(open(script_tables_path, encoding= 'utf-8').read())
+            cur.executescript(open(script_data_path, encoding= 'utf-8').read())
             conn.commit()
             conn.close()
         except sqlite3.Error as ex:

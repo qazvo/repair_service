@@ -99,8 +99,8 @@ class AdminWindow(QWidget):
             # Показываем диалоговое окно подтверждения удаления
             confirmation = QMessageBox.question(self, "Удаление пользователя", 
                                                  "Вы уверены, что хотите удалить этого пользователя?",
-                                                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-            if confirmation == QMessageBox.StandardButton.Yes:
+                                                 QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel)
+            if confirmation == QMessageBox.StandardButton.Ok:
                 result = main_functions.delete_user(User(id = self.table_model.item(selected_row, 0).text()))
                 if result == 200:
                     self.load_user_data()
@@ -170,21 +170,17 @@ class EditUserWindow(QDialog):
             QMessageBox.critical(self, "Ошибка", "Не удалось загрузить роли из базы данных.")
 
     def save_user(self):
-        login = self.lineEdit_login.text()
-        password = self.lineEdit_password.text()
+        user = User(id= self.user_id,login= self.lineEdit_login.text(), password= self.lineEdit_password.text(), type_id= main_functions.role_definition(TypeUser(name = self.comboBox_role.currentText())))
 
-        if not login or not password:
+        if not user.login or not user.password:
             QMessageBox.warning(self, "Предупреждение", "Логин и пароль не могут быть пустыми.")
             return
-        
-        if len(login) < 6 or len(password) < 6:
+
+        if len(user.login) < 6 or len(user.password) < 6:
             QMessageBox.warning(self, "Предупреждение", "Логин и пароль должны быть длиной не менее 6 символов.")
             return
         
-        # Определяем роль в виде числового значения
-        role_id = main_functions.role_definition(TypeUser(name = self.comboBox_role.currentText()))
-        # Обновляем данные пользователя в базе данных
-        result = main_functions.update_user(User(id = self.user_id, login = login, password = password, type_id = role_id))
+        result = main_functions.update_user(user)
         if result == 200:
             self.parent().load_user_data()
             QMessageBox.information(self, "Успех", "Информация о пользователе успешно обновлена!")
@@ -250,21 +246,17 @@ class AddUserWindow(QDialog):
             QMessageBox.critical(self, "Ошибка", "Не удалось загрузить роли из базы данных.")
 
     def save_user(self):
-        login = self.lineEdit_login.text()
-        password = self.lineEdit_password.text()
+        user = User(login= self.lineEdit_login.text(), password= self.lineEdit_password.text(), type_id= main_functions.role_definition(TypeUser(name = self.comboBox_role.currentText())))
 
-        if not login or not password:
+        if not user.login or not user.password:
             QMessageBox.warning(self, "Предупреждение", "Логин и пароль не могут быть пустыми.")
             return
 
-        if len(login) < 6 or len(password) < 6:
+        if len(user.login) < 6 or len(user.password) < 6:
             QMessageBox.warning(self, "Предупреждение", "Логин и пароль должны быть длиной не менее 6 символов.")
             return
-
-        # Определяем роль в виде числового значения
-        role_id = main_functions.role_definition(TypeUser(name = self.comboBox_role.currentText()))
-        # Добавляем нового пользователя в базу данных
-        result = main_functions.add_user(User(login= login, password= password, type_id= role_id))
+        
+        result = main_functions.add_user(user)
         if result == 200:
             self.parent().load_user_data()
             QMessageBox.information(self, "Успех", "Новый пользователь успешно добавлен!")

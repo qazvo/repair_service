@@ -67,19 +67,20 @@ class RegisterWindow(QWidget):
             self.lineEdit_password.setEchoMode(QLineEdit.EchoMode.Password)
 
     def register_account(self):
-        if len(self.lineEdit_login.text()) > 5 and len(self.lineEdit_password.text()) > 7:
-            if main_functions.check_login_user(User(login = self.lineEdit_login.text(), password = self.lineEdit_password.text())) == None:
+        user = User(login= self.lineEdit_login.text(), password= self.lineEdit_password.text())
+        if len(user.login) > 5 and len(user.password) > 7:
+            if main_functions.check_login_user(user) == None:
                 if main_functions.check_email_customer(Customer(email = self.lineEdit_email.text())) == None:
-                    if main_functions.register(User(login = self.lineEdit_login.text(), password = self.lineEdit_password.text()), Customer(email = self.lineEdit_email.text())) == 200:
+                    if main_functions.register(user, Customer(email = self.lineEdit_email.text())) == 200:
                         QMessageBox.information(self, "Успех", "Аккаунт успешно зарегистрирован!")
                         self.close()
                         self.login_window.show()
                     else:
-                        QMessageBox.information(self, "Провал", "Неудалось создать аккаунт!")
+                        QMessageBox.information(self, "Провал", "Неудалось создать аккаунт.")
                 else:
-                    QMessageBox.information(self, "Провал", "Эта почта уже зарегистрирована!")
+                    QMessageBox.information(self, "Провал", "Эта почта уже зарегистрирована.")
             else:
-                QMessageBox.information(self, "Провал", "Этот логин занят!")
+                QMessageBox.information(self, "Провал", "Этот логин занят.")
         else:
             QMessageBox.information(self, "Провал", "Логин должен состоять из 6 или более симоволов, а пароль из 8 и более!") 
 

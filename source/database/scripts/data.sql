@@ -17,6 +17,11 @@ INSERT INTO statuses (name) VALUES ('Выполнено');
 
 -- Добавление инструментария
 INSERT INTO tools (name) VALUES ('Паяльная станция');
-INSERT INTO tools (name) VALUES ('None');
-INSERT INTO tools (name) VALUES ('None');
-INSERT INTO tools (name) VALUES ('NoNN');
+INSERT INTO tools (name) VALUES ('Ремонтный фен');
+INSERT INTO tools (name) VALUES ('Диагностическая станция');
+
+-- Добавление типов устройств 
+INSERT INTO types_devices (name) VALUES ('Смартфон');
+INSERT INTO types_devices (name) VALUES ('Стиральная машина');
+INSERT INTO types_devices (name) VALUES ('Ноутбук');
+INSERT INTO types_devices (name) VALUES ('Пылесос');

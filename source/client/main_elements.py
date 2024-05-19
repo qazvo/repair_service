@@ -10,6 +10,24 @@ class User:
     def to_json(self):
         return f'{{"id": "{self.id}""login": "{self.login}", "password": "{self.password}", "type_id": {self.type_id}}}'
     
+class Device:
+    def __init__(self, id: int = None, type_id: int = None,  model: str = None, serial_number: str = None):
+        self.id = id
+        self.type_id = type_id
+        self.model = model
+        self.serial_number = serial_number
+    def to_json(self):
+        return f'{{"id": "{self.id}""type_id": "{self.type_id}", "model": "{self.model}", "serial_number": {self.serial_number}}}'
+    
+class Appeal:
+    def __init__(self, id: int = None, customer_id: int = None,  device_id: int = None, description: str = None):
+        self.id = id
+        self.customer_id = customer_id
+        self.device_id = device_id
+        self.description = description
+    def to_json(self):
+        return f'{{"id": "{self.id}""type_id": "{self.type_id}", "model": "{self.model}", "serial_number": {self.serial_number}}}'
+    
 class Customer:
     def __init__(self, id: int = None, FIO: str = None,  address: str = None, number_phone: int = None, email: int = None):
         self.id = id
@@ -21,6 +39,13 @@ class Customer:
         return f'{{"id": "{self.id}""FIO": "{self.FIO}", "adress": "{self.adress}", "number_phone": {self.number_phone}, "email": {self.email}}}'
     
 class TypeUser:
+    def __init__(self, id: int = None, name: str = None):
+        self.id = id
+        self.name = name
+    def to_json(self):
+        return f'{{"id": "{self.id}""name": "{self.name}"}}'
+    
+class TypeDevice:
     def __init__(self, id: int = None, name: str = None):
         self.id = id
         self.name = name
@@ -90,5 +115,39 @@ class MainFunctions:
     def update_customer(self, customer: Customer):
         result = db_manager.execute("""UPDATE customers SET FIO = ?, address = ?, number_phone = ? WHERE id = ?""", args= (customer.FIO, customer.address, customer.number_phone, customer.id))
         return result["code"]
+    
+    def load_types_devices(self) -> tuple:
+        result = db_manager.execute("""SELECT name FROM types_devices""", many= True)
+        return result
+    
+    def load_previous_devices(self, customer: Customer) -> tuple:
+        result = db_manager.execute("""SELECT DISTINCT d.model
+                                        FROM appeals a
+                                        JOIN devices d ON a.device_id = d.id
+                                        JOIN types_devices td ON d.type_id = td.id
+                                        WHERE a.customer_id = ?""", args= (customer.id,), many= True)
+        return result
+    
+    def type_device_definition(self, typedevice: TypeDevice) -> int:
+        result = db_manager.execute("""SELECT id FROM types_devices WHERE name = ?""", args= (typedevice.name,))
+        return result["data"][0]
+    
+    def add_appeal(self, appeal: Appeal, device: Device, previous_device: bool = None):
+        if previous_device:
+            result_appeal = db_manager.execute("""INSERT INTO appeals(customer_id, device_id, description) VALUES (?, ?, ?)""", args= (appeal.customer_id, device.id, appeal.description))
+            return result_appeal["code"]
+        else:
+            db_manager.execute("""INSERT INTO devices (type_id, model, serial_number) VALUES (?, ?, ?)""", args= (device.type_id, device.model, device.serial_number))
+            for_device_id = db_manager.execute("""SELECT id FROM devices WHERE model == ? AND serial_number == ?""", args = (device.model, device.serial_number))
+            result_appeal = db_manager.execute("""INSERT INTO appeals(customer_id, device_id, description) VALUES (?, ?, ?)""", args= (appeal.customer_id, for_device_id["data"][0], appeal.description))
+        return result_appeal["code"]
+    
+    def load_previous_device(self, customer: Customer, device: Device) -> tuple:
+        result = db_manager.execute("""SELECT DISTINCT d.id
+                                        FROM appeals a
+                                        JOIN devices d ON a.device_id = d.id
+                                        JOIN types_devices td ON d.type_id = td.id
+                                        WHERE a.customer_id = ? AND d.model = ?""", args= (customer.id, device.model))
+        return result["data"][0]
     
 main_functions = MainFunctions(db_manager)

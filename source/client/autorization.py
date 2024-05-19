@@ -79,7 +79,7 @@ class LoginWindow(QMainWindow):
                 self.admin_window.show()
             self.close()
         else:
-            QMessageBox.information(self, "Провал", "Неверный логин или пароль!")
+            QMessageBox.information(self, "Провал", "Неверный логин или пароль.")
 
 
     def open_register_window(self):
