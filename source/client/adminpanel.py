@@ -71,7 +71,7 @@ class AdminWindow(QWidget):
         result = main_functions.load_user_data()
         if result["code"] == 200 and result["data"]:
             # Устанавливаем заголовки колонок
-            self.table_model.setHorizontalHeaderLabels(["ID", "Login", "Password", "Role"])
+            self.table_model.setHorizontalHeaderLabels(["Номер аккаунта", "Логин", "Пароль", "Тип аккаунта"])
             # Очищаем текущие данные модели
             self.table_model.removeRows(0, self.table_model.rowCount())
             # Заполняем модель данными

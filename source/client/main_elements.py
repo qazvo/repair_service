@@ -29,7 +29,7 @@ class Appeal:
         return f'{{"id": "{self.id}""type_id": "{self.type_id}", "model": "{self.model}", "serial_number": {self.serial_number}}}'
     
 class Customer:
-    def __init__(self, id: int = None, FIO: str = None,  address: str = None, number_phone: int = None, email: int = None):
+    def __init__(self, id: int = None, FIO: str = None,  address: str = None, number_phone: str = None, email: str = None):
         self.id = id
         self.FIO = FIO
         self.address = address
@@ -51,7 +51,16 @@ class TypeDevice:
         self.name = name
     def to_json(self):
         return f'{{"id": "{self.id}""name": "{self.name}"}}'
-
+class Claim:
+    def __init__(self, id: int = None, appeal_id: int = None,  start_date: str = None, end_date: str = None, status_id: int = None):
+        self.id = id
+        self.appeal_id = appeal_id
+        self.start_date = start_date
+        self.end_date = end_date
+        self.status_id = status_id
+    def to_json(self):
+        return f'{{"id": "{self.id}""FIO": "{self.FIO}", "adress": "{self.adress}", "number_phone": {self.number_phone}, "email": {self.email}}}'
+    
 class MainFunctions:
     def __init__(self, db_manager):
         self.db_manager = db_manager
@@ -142,12 +151,29 @@ class MainFunctions:
             result_appeal = db_manager.execute("""INSERT INTO appeals(customer_id, device_id, description) VALUES (?, ?, ?)""", args= (appeal.customer_id, for_device_id["data"][0], appeal.description))
         return result_appeal["code"]
     
-    def load_previous_device(self, customer: Customer, device: Device) -> tuple:
+    def definition_previous_device(self, customer: Customer, device: Device) -> tuple:
         result = db_manager.execute("""SELECT DISTINCT d.id
                                         FROM appeals a
                                         JOIN devices d ON a.device_id = d.id
                                         JOIN types_devices td ON d.type_id = td.id
                                         WHERE a.customer_id = ? AND d.model = ?""", args= (customer.id, device.model))
         return result["data"][0]
+    
+    def load_appeals(self, customer: Customer):
+        result = db_manager.execute("""SELECT a.id, d.model, a.description 
+                                    FROM appeals a
+                                    JOIN devices d ON a.device_id = d.id
+                                    WHERE a.customer_id = ?
+                                    """, (customer.id,), many=True)
+        return result["data"]
+    
+    def load_claims(self, customer: Customer):
+        result = db_manager.execute("""SELECT c.id, c.start_date, d.model, a.description, s.name 
+                                        FROM claims c
+                                        JOIN appeals a ON c.appeal_id = a.id
+                                        JOIN devices d ON a.device_id = d.id
+                                        JOIN statuses s ON c.status_id = s.id
+                                        WHERE a.customer_id = ?""", (customer.id,), many=True)
+        return result["data"]
     
 main_functions = MainFunctions(db_manager)

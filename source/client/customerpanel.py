@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QMessageBox, QFormLayout, QDialog, QListWidget, QInputDialog, QApplication, QSizePolicy, QSpacerItem, QComboBox, QTextEdit, QCheckBox
+from PyQt6.QtWidgets import QTableWidgetItem, QHeaderView, QTableView, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QMessageBox, QFormLayout, QDialog, QListWidget, QInputDialog, QApplication, QSizePolicy, QSpacerItem, QComboBox, QTextEdit, QCheckBox, QStackedWidget, QTableWidget
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont, QIcon
+from PyQt6.QtGui import QStandardItemModel, QFont, QIcon, QPixmap
 from client.main_elements import Customer, main_functions, Appeal, Device, TypeDevice
 
 class InformationAboutCustomer(QWidget):
@@ -93,20 +93,122 @@ class CustomerWindow(QWidget):
         self.customer_id = customer_id
 
         self.setWindowTitle("Панель пользователя")
-        self.setFixedSize(600, 400)
+        self.setGeometry(100, 100, 1000, 600)
         self.setWindowIcon(QIcon('img/logo.png'))
 
-        self.create_appeal_button = QPushButton("Создать обращение", self)
-        self.create_appeal_button.clicked.connect(self.create_appeal)
+        main_layout = QHBoxLayout()
+        self.setLayout(main_layout)
 
-        layout = QVBoxLayout()
-        layout.addWidget(self.create_appeal_button)
-        self.setLayout(layout)
+        sidebar_widget = QWidget()
+        sidebar_layout = QVBoxLayout()
+        sidebar_widget.setLayout(sidebar_layout)
+
+        logo_label = QLabel()
+        pixmap = QPixmap("img/mastertechh.png")
+        logo_label.setPixmap(pixmap)
+        logo_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        sidebar_layout.addWidget(logo_label)
+
+        profile_button = QPushButton()
+        profile_pixmap = QPixmap("img/profile.png") 
+        profile_icon = QIcon(profile_pixmap)
+        profile_button.setIcon(profile_icon)
+        profile_button.setIconSize(profile_pixmap.size() / 2)
+        profile_button.setFixedSize(profile_pixmap.size() / 2) 
+        profile_button.setStyleSheet("QPushButton { background: transparent; border: none; }")  
+        profile_button.clicked.connect(self.show_user_data)
+        sidebar_layout.addWidget(profile_button, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        small_spacer = QSpacerItem(20, 10, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+        sidebar_layout.addItem(small_spacer)
+
+        requests_button = QPushButton("Мои обращения")
+        requests_button.clicked.connect(self.show_appeals)
+        sidebar_layout.addWidget(requests_button)
+
+        approved_button = QPushButton("Одобренные заявки на ремонт")
+        approved_button.clicked.connect(self.show_approved_applications)
+        sidebar_layout.addWidget(approved_button)
+
+        sidebar_layout.addStretch()
+
+        main_layout.addWidget(sidebar_widget)
+
+        self.content_widget = QStackedWidget()
+        main_layout.addWidget(self.content_widget)
+
+        self.appeals_table_widget = QWidget()
+        self.appeals_table_layout = QVBoxLayout()
+        self.appeals_table_widget.setLayout(self.appeals_table_layout)
+
+        self.appeals_table = QTableWidget()
+        self.appeals_table.setColumnCount(3)
+        self.appeals_table.setHorizontalHeaderLabels(["Номер обращения", "Устройство", "Описание проблемы"])
+        self.appeals_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.appeals_table.setSelectionBehavior(QTableView.SelectionBehavior.SelectRows)
+        self.appeals_table.setSelectionMode(QTableView.SelectionMode.SingleSelection)
+        self.appeals_table.setAlternatingRowColors(True)
+        self.appeals_table.verticalHeader().setVisible(False)
+        self.appeals_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        
+        self.create_appeal_button = QPushButton("Создать обращение")
+        self.create_appeal_button.clicked.connect(self.create_request)
+        
+        self.appeals_table_layout.addWidget(self.appeals_table)
+        self.appeals_table_layout.addWidget(self.create_appeal_button)
+
+        self.show_appeals()
+
+        self.claims_table = QTableWidget()
+        self.claims_table.setColumnCount(5)
+        self.claims_table.setHorizontalHeaderLabels(["Номер заявки", "Дата приема", "Устройство", "Описание проблемы", "Статус"])
+        self.claims_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.claims_table.setSelectionBehavior(QTableView.SelectionBehavior.SelectRows)
+        self.claims_table.setSelectionMode(QTableView.SelectionMode.SingleSelection)
+        self.claims_table.setAlternatingRowColors(True)
+        self.claims_table.verticalHeader().setVisible(False)
+        self.claims_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+
+        self.content_widget.addWidget(self.appeals_table_widget)
+        self.content_widget.addWidget(self.claims_table)
+
         self.center()
 
-    def create_appeal(self):
-        self.edit_user_window = CreateAppealForm(self.customer_id, self)
-        self.edit_user_window.show()
+    def show_user_data(self):
+        user_data_widget = QWidget()
+        user_data_layout = QVBoxLayout()
+        user_data_widget.setLayout(user_data_layout)
+
+        user_data_label = QLabel("Данные пользователя")
+        user_data_layout.addWidget(user_data_label)
+
+        change_data_button = QPushButton("Изм. данные")
+        change_password_button = QPushButton("Изм. пароль")
+        user_data_layout.addWidget(change_data_button)
+        user_data_layout.addWidget(change_password_button)
+
+        self.content_widget.addWidget(user_data_widget)
+        self.content_widget.setCurrentWidget(user_data_widget)
+
+    def show_appeals(self):
+        appeals_data = main_functions.load_appeals(Customer(id = self.customer_id))
+        self.appeals_table.setRowCount(len(appeals_data))
+        for row, appeal in enumerate(appeals_data):
+            for col, item in enumerate(appeal):
+                self.appeals_table.setItem(row, col, QTableWidgetItem(str(item)))
+        self.content_widget.setCurrentWidget(self.appeals_table_widget)
+
+    def show_approved_applications(self):
+        claims_data = main_functions.load_claims(Customer(id = self.customer_id))
+        self.claims_table.setRowCount(len(claims_data))
+        for row, claim in enumerate(claims_data):
+            for col, item in enumerate(claim):
+                self.claims_table.setItem(row, col, QTableWidgetItem(str(item)))
+        self.content_widget.setCurrentWidget(self.claims_table)
+
+    def create_request(self):
+        self.create_appeal_form = CreateAppealForm(self.customer_id)
+        self.create_appeal_form.show()
 
     def center(self):
         screen = QApplication.primaryScreen().geometry()
@@ -205,7 +307,7 @@ class CreateAppealForm(QDialog):
             QMessageBox.critical(self, "Ошибка", "Не удалось загрузить типы устройств из базы данных.")
     def save_appeal(self):
         if self.checkbox_select_previous.isChecked():
-            device = Device(id = main_functions.load_previous_device(Customer(id= self.customer_id), Device(model= self.combobox_previous_devices.currentText())))
+            device = Device(id = main_functions.definition_previous_device(Customer(id= self.customer_id), Device(model= self.combobox_previous_devices.currentText())))
             appeal = Appeal(customer_id= self.customer_id, description = self.textEdit_description.toPlainText())
             result = main_functions.add_appeal(appeal, device, previous_device= True)
             if result == 200:
