@@ -176,4 +176,12 @@ class MainFunctions:
                                         WHERE a.customer_id = ?""", (customer.id,), many=True)
         return result["data"]
     
+    def load_information_customer(self, customer: Customer):
+        result = db_manager.execute("""SELECT FIO, address, number_phone, email FROM customers WHERE id = ?""", (customer.id,))
+        return result["data"]
+    
+    def update_full_information_customer(self, customer: Customer):
+        result = db_manager.execute("""UPDATE customers SET FIO = ?, address = ?, number_phone = ?, email = ? WHERE id = ?""", args= (customer.FIO, customer.address, customer.number_phone, customer.email, customer.id))
+        return result["code"]
+    
 main_functions = MainFunctions(db_manager)

@@ -24,7 +24,7 @@ class DBManager:
             conn.close()
         except sqlite3.Error as ex:
             print(ex)
-            os.remove(self.db_path)
+            os.remove(self.default_path)
 
     def execute(self, query: str, args: tuple = (), many: bool = False) -> dict:
         conn, cur = self.connect_to_db()

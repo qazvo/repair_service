@@ -180,15 +180,82 @@ class CustomerWindow(QWidget):
         user_data_widget.setLayout(user_data_layout)
 
         user_data_label = QLabel("Данные пользователя")
-        user_data_layout.addWidget(user_data_label)
+        user_data_label.setStyleSheet("font-size: 20px; font-weight: bold;")
+        user_data_layout.addWidget(user_data_label, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        change_data_button = QPushButton("Изм. данные")
-        change_password_button = QPushButton("Изм. пароль")
-        user_data_layout.addWidget(change_data_button)
-        user_data_layout.addWidget(change_password_button)
+        profile_data = main_functions.load_information_customer(Customer(id = self.customer_id))
+
+        self.form_layout = QFormLayout()
+        self.form_layout.setContentsMargins(50, 20, 50, 20)
+
+        self.full_name_label = QLabel(profile_data[0])
+        self.address_label = QLabel(profile_data[1])
+        self.phone_label = QLabel(profile_data[2])
+        self.email_label = QLabel(profile_data[3])
+
+        labels = [self.full_name_label, self.address_label, self.phone_label, self.email_label]
+        for label in labels:
+            label.setStyleSheet("font-size: 16px; padding: 5px; border: 1px solid #ccc; border-radius: 5px;")
+            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.form_layout.addRow("ФИО:", self.full_name_label)
+        self.form_layout.addRow("Адрес:", self.address_label)
+        self.form_layout.addRow("Телефон:", self.phone_label)
+        self.form_layout.addRow("Email:", self.email_label)
+
+        user_data_layout.addLayout(self.form_layout)
+
+        self.change_data_button = QPushButton("Изм. данные")
+        self.change_data_button.setStyleSheet("padding: 10px; font-size: 16px;")
+        self.change_data_button.clicked.connect(self.enable_editing)
+        user_data_layout.addWidget(self.change_data_button, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.content_widget.addWidget(user_data_widget)
         self.content_widget.setCurrentWidget(user_data_widget)
+
+    def enable_editing(self):
+        self.full_name_input = QLineEdit(self.full_name_label.text())
+        self.address_input = QLineEdit(self.address_label.text())
+        self.phone_input = QLineEdit(self.phone_label.text())
+        self.email_input = QLineEdit(self.email_label.text())
+
+        inputs = [self.full_name_input, self.address_input, self.phone_input, self.email_input]
+        for input_field in inputs:
+            input_field.setStyleSheet("font-size: 16px; padding: 5px; border: 1px solid #ccc; border-radius: 5px;")
+
+        self.form_layout.removeRow(self.full_name_label)
+        self.form_layout.removeRow(self.address_label)
+        self.form_layout.removeRow(self.phone_label)
+        self.form_layout.removeRow(self.email_label)
+
+        self.form_layout.insertRow(0, "ФИО:", self.full_name_input)
+        self.form_layout.insertRow(1, "Адрес:", self.address_input)
+        self.form_layout.insertRow(2, "Телефон:", self.phone_input)
+        self.form_layout.insertRow(3, "Email:", self.email_input)
+
+        save_button = QPushButton("Сохранить")
+        save_button.setStyleSheet("padding: 10px; font-size: 16px;")
+        save_button.clicked.connect(self.save_user_data)
+
+        cancel_button = QPushButton("Отмена")
+        cancel_button.setStyleSheet("padding: 10px; font-size: 16px;")
+        cancel_button.clicked.connect(self.cancel_editing)
+
+        buttons_layout = QHBoxLayout()
+        buttons_layout.addWidget(save_button)
+        buttons_layout.addWidget(cancel_button)
+
+        self.form_layout.addRow(buttons_layout)
+
+        self.change_data_button.setVisible(False)
+
+    def cancel_editing(self):
+        self.show_user_data()
+
+    def save_user_data(self):
+        customer = Customer(id = self.customer_id, FIO = self.full_name_input.text(), address=  self.address_input.text(), number_phone= self.phone_input.text(), email= self.email_input.text())
+        main_functions.update_full_information_customer(customer)
+        self.show_user_data()
 
     def show_appeals(self):
         appeals_data = main_functions.load_appeals(Customer(id = self.customer_id))
