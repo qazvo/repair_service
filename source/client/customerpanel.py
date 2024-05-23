@@ -206,17 +206,14 @@ class CustomerWindow(QWidget):
 
         user_data_layout.addLayout(self.form_layout)
 
-        # Кнопка изменения данных
         self.change_data_button = QPushButton("Изменить данные")
         self.change_data_button.setStyleSheet("padding: 10px; font-size: 16px;")
         self.change_data_button.clicked.connect(self.enable_editing)
 
-        # Кнопка изменения пароля
         self.change_password_button = QPushButton("Изменить пароль")
         self.change_password_button.setStyleSheet("padding: 10px; font-size: 16px;")
         self.change_password_button.clicked.connect(self.change_password)
 
-        # Добавляем кнопки в QHBoxLayout
         buttons_layout = QHBoxLayout()
         buttons_layout.addWidget(self.change_data_button)
         buttons_layout.addWidget(self.change_password_button)
@@ -279,7 +276,9 @@ class CustomerWindow(QWidget):
         self.appeals_table.setRowCount(len(appeals_data))
         for row, appeal in enumerate(appeals_data):
             for col, item in enumerate(appeal):
-                self.appeals_table.setItem(row, col, QTableWidgetItem(str(item)))
+                table_item = QTableWidgetItem(str(item))
+                table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)  # Установка выравнивания по центру
+                self.appeals_table.setItem(row, col, table_item)
         self.content_widget.setCurrentWidget(self.appeals_table_widget)
 
     def show_approved_applications(self):
@@ -287,7 +286,9 @@ class CustomerWindow(QWidget):
         self.claims_table.setRowCount(len(claims_data))
         for row, claim in enumerate(claims_data):
             for col, item in enumerate(claim):
-                self.claims_table.setItem(row, col, QTableWidgetItem(str(item)))
+                table_item = QTableWidgetItem(str(item))
+                table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)  # Установка выравнивания по центру
+                self.claims_table.setItem(row, col, table_item)
         self.content_widget.setCurrentWidget(self.claims_table)
 
     def create_request(self):
@@ -311,7 +312,7 @@ class ChangePasswordDialog(QDialog):
 
         self.setWindowTitle("Изменение пароля")
         self.setWindowIcon(QIcon('img/logo.png'))
-        self.setFixedSize(300, 200)
+        self.setFixedSize(300, 230)
 
         layout = QVBoxLayout()
 
@@ -327,12 +328,16 @@ class ChangePasswordDialog(QDialog):
         self.lineEdit_confirm_password = QLineEdit()
         self.lineEdit_confirm_password.setEchoMode(QLineEdit.EchoMode.Password)
 
+        self.show_password_checkbox = QCheckBox("Показать пароль")
+        self.show_password_checkbox.stateChanged.connect(self.toggle_password_visibility)
+
         layout.addWidget(self.label_old_password)
         layout.addWidget(self.lineEdit_old_password)
         layout.addWidget(self.label_new_password)
         layout.addWidget(self.lineEdit_new_password)
         layout.addWidget(self.label_confirm_password)
         layout.addWidget(self.lineEdit_confirm_password)
+        layout.addWidget(self.show_password_checkbox)
 
         layout.addSpacerItem(QSpacerItem(10, 10, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         
@@ -349,6 +354,16 @@ class ChangePasswordDialog(QDialog):
         layout.addLayout(buttons_layout)
 
         self.setLayout(layout)
+
+    def toggle_password_visibility(self, state):
+        if state == Qt.CheckState.Checked.value:
+            self.lineEdit_old_password.setEchoMode(QLineEdit.EchoMode.Normal)
+            self.lineEdit_new_password.setEchoMode(QLineEdit.EchoMode.Normal)
+            self.lineEdit_confirm_password.setEchoMode(QLineEdit.EchoMode.Normal)
+        else:
+            self.lineEdit_old_password.setEchoMode(QLineEdit.EchoMode.Password)
+            self.lineEdit_new_password.setEchoMode(QLineEdit.EchoMode.Password)
+            self.lineEdit_confirm_password.setEchoMode(QLineEdit.EchoMode.Password)
 
     def change_password(self):
         old_password = self.lineEdit_old_password.text()
