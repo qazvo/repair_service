@@ -103,6 +103,7 @@ class CustomerWindow(QWidget):
         sidebar_layout = QVBoxLayout()
         sidebar_widget.setLayout(sidebar_layout)
 
+        self.change_password_button = QPushButton("Изм. пароль")
         logo_label = QLabel()
         pixmap = QPixmap("img/mastertechh.png")
         logo_label.setPixmap(pixmap)
@@ -179,11 +180,11 @@ class CustomerWindow(QWidget):
         user_data_layout = QVBoxLayout()
         user_data_widget.setLayout(user_data_layout)
 
-        user_data_label = QLabel("Данные пользователя")
+        user_data_label = QLabel("Ваши личные данные")
         user_data_label.setStyleSheet("font-size: 20px; font-weight: bold;")
         user_data_layout.addWidget(user_data_label, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        profile_data = main_functions.load_information_customer(Customer(id = self.customer_id))
+        profile_data = main_functions.load_information_customer(Customer(id=self.customer_id))
 
         self.form_layout = QFormLayout()
         self.form_layout.setContentsMargins(50, 20, 50, 20)
@@ -205,13 +206,28 @@ class CustomerWindow(QWidget):
 
         user_data_layout.addLayout(self.form_layout)
 
-        self.change_data_button = QPushButton("Изм. данные")
+        # Кнопка изменения данных
+        self.change_data_button = QPushButton("Изменить данные")
         self.change_data_button.setStyleSheet("padding: 10px; font-size: 16px;")
         self.change_data_button.clicked.connect(self.enable_editing)
-        user_data_layout.addWidget(self.change_data_button, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        # Кнопка изменения пароля
+        self.change_password_button = QPushButton("Изменить пароль")
+        self.change_password_button.setStyleSheet("padding: 10px; font-size: 16px;")
+        self.change_password_button.clicked.connect(self.change_password)
+
+        # Добавляем кнопки в QHBoxLayout
+        buttons_layout = QHBoxLayout()
+        buttons_layout.addWidget(self.change_data_button)
+        buttons_layout.addWidget(self.change_password_button)
+
+        user_data_layout.addLayout(buttons_layout)
+        user_data_layout.setAlignment(buttons_layout, Qt.AlignmentFlag.AlignCenter)
 
         self.content_widget.addWidget(user_data_widget)
         self.content_widget.setCurrentWidget(user_data_widget)
+
+        user_data_layout.addSpacerItem(QSpacerItem(10, 10, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
 
     def enable_editing(self):
         self.full_name_input = QLineEdit(self.full_name_label.text())
@@ -246,6 +262,7 @@ class CustomerWindow(QWidget):
         buttons_layout.addWidget(cancel_button)
 
         self.form_layout.addRow(buttons_layout)
+        self.change_password_button.hide()
 
         self.change_data_button.setVisible(False)
 
@@ -277,10 +294,71 @@ class CustomerWindow(QWidget):
         self.create_appeal_form = CreateAppealForm(self.customer_id)
         self.create_appeal_form.show()
 
+    def change_password(self):
+        change_password_dialog = ChangePasswordDialog(self.customer_id, self)
+        change_password_dialog.show()
+
     def center(self):
         screen = QApplication.primaryScreen().geometry()
         size = self.geometry()
         self.move((screen.width() - size.width()) // 2, (screen.height() - size.height()) // 2)
+
+class ChangePasswordDialog(QDialog):
+    def __init__(self, customer_id, parent=None):
+        super().__init__(parent)
+
+        self.customer_id = customer_id
+
+        self.setWindowTitle("Изменение пароля")
+        self.setWindowIcon(QIcon('img/logo.png'))
+        self.setFixedSize(300, 200)
+
+        layout = QVBoxLayout()
+
+        self.label_old_password = QLabel("Старый пароль:")
+        self.lineEdit_old_password = QLineEdit()
+        self.lineEdit_old_password.setEchoMode(QLineEdit.EchoMode.Password)
+
+        self.label_new_password = QLabel("Новый пароль:")
+        self.lineEdit_new_password = QLineEdit()
+        self.lineEdit_new_password.setEchoMode(QLineEdit.EchoMode.Password)
+
+        self.label_confirm_password = QLabel("Подтверждение пароля:")
+        self.lineEdit_confirm_password = QLineEdit()
+        self.lineEdit_confirm_password.setEchoMode(QLineEdit.EchoMode.Password)
+
+        layout.addWidget(self.label_old_password)
+        layout.addWidget(self.lineEdit_old_password)
+        layout.addWidget(self.label_new_password)
+        layout.addWidget(self.lineEdit_new_password)
+        layout.addWidget(self.label_confirm_password)
+        layout.addWidget(self.lineEdit_confirm_password)
+
+        layout.addSpacerItem(QSpacerItem(10, 10, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+        
+        buttons_layout = QHBoxLayout()
+
+        self.save_button = QPushButton("Изменить")
+        self.save_button.clicked.connect(self.change_password)
+        self.cancel_button = QPushButton("Отмена")
+        self.cancel_button.clicked.connect(self.close_form)
+
+        buttons_layout.addWidget(self.save_button)
+        buttons_layout.addWidget(self.cancel_button)
+
+        layout.addLayout(buttons_layout)
+
+        self.setLayout(layout)
+
+    def change_password(self):
+        old_password = self.lineEdit_old_password.text()
+        new_password = self.lineEdit_new_password.text()
+        confirm_password = self.lineEdit_confirm_password.text()
+
+        self.close()
+        
+    def close_form(self):
+        self.close()
 
 class CreateAppealForm(QDialog):
     def __init__(self, customer_id, parent=None):
