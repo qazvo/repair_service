@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QTableWidgetItem, QHeaderView, QTableView, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QMessageBox, QFormLayout, QDialog, QListWidget, QInputDialog, QApplication, QSizePolicy, QSpacerItem, QComboBox, QTextEdit, QCheckBox, QStackedWidget, QTableWidget
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QStandardItemModel, QFont, QIcon, QPixmap
-from client.main_elements import Customer, main_functions, Appeal, Device, TypeDevice
+from client.main_elements import Customer, main_functions, Appeal, Device, TypeDevice, User
 
 class InformationAboutCustomer(QWidget):
     def __init__(self, customer_id):
@@ -68,7 +68,7 @@ class InformationAboutCustomer(QWidget):
 
     def save_client_info(self):
         customer = Customer(id = self.customer_id, FIO = self.lineEdit_fio.text(), address = self.lineEdit_address.text(), number_phone = self.lineEdit_phone.text())
-        if not customer.FIO or not customer.address or not customer.number_phone:
+        if not customer.FIO or not customer.address or not customer.number_phone: ## Сделать проверку по формату номера
             QMessageBox.warning(self, "Предупреждение", "Все поля должны быть заполнены")
             return
         result = main_functions.update_customer(customer)
@@ -93,7 +93,7 @@ class CustomerWindow(QWidget):
         self.customer_id = customer_id
 
         self.setWindowTitle("Панель пользователя")
-        self.setGeometry(100, 100, 1000, 600)
+        self.setFixedSize(1100, 600)
         self.setWindowIcon(QIcon('img/logo.png'))
 
         main_layout = QHBoxLayout()
@@ -103,7 +103,6 @@ class CustomerWindow(QWidget):
         sidebar_layout = QVBoxLayout()
         sidebar_widget.setLayout(sidebar_layout)
 
-        self.change_password_button = QPushButton("Изм. пароль")
         logo_label = QLabel()
         pixmap = QPixmap("img/mastertechh.png")
         logo_label.setPixmap(pixmap)
@@ -111,12 +110,12 @@ class CustomerWindow(QWidget):
         sidebar_layout.addWidget(logo_label)
 
         profile_button = QPushButton()
-        profile_pixmap = QPixmap("img/profile.png") 
+        profile_pixmap = QPixmap("img/profile.png")
         profile_icon = QIcon(profile_pixmap)
         profile_button.setIcon(profile_icon)
         profile_button.setIconSize(profile_pixmap.size() / 2)
-        profile_button.setFixedSize(profile_pixmap.size() / 2) 
-        profile_button.setStyleSheet("QPushButton { background: transparent; border: none; }")  
+        profile_button.setFixedSize(profile_pixmap.size() / 2)
+        profile_button.setStyleSheet("QPushButton { background: transparent; border: none; }")
         profile_button.clicked.connect(self.show_user_data)
         sidebar_layout.addWidget(profile_button, alignment=Qt.AlignmentFlag.AlignCenter)
 
@@ -151,14 +150,33 @@ class CustomerWindow(QWidget):
         self.appeals_table.setAlternatingRowColors(True)
         self.appeals_table.verticalHeader().setVisible(False)
         self.appeals_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
-        
+
         self.create_appeal_button = QPushButton("Создать обращение")
+        self.create_appeal_button.setFixedSize(800, 24)
         self.create_appeal_button.clicked.connect(self.create_request)
-        
+
+        self.refresh_appeals_button = QPushButton("")
+        self.refresh_appeals_button.setFixedSize(28, 24)
+        self.refresh_appeals_button.setIcon(QIcon("img/refresh.png"))
+        self.refresh_appeals_button.clicked.connect(self.show_appeals)
+
+        button_layout = QHBoxLayout()
+        button_layout.addWidget(self.create_appeal_button)
+        button_layout.addWidget(self.refresh_appeals_button)
+
         self.appeals_table_layout.addWidget(self.appeals_table)
-        self.appeals_table_layout.addWidget(self.create_appeal_button)
+        self.appeals_table_layout.addLayout(button_layout)
+
+        # Создание виджета для таблицы заявок
+        self.claims_table_widget = QWidget()
+        self.claims_table_layout = QVBoxLayout()
+        self.claims_table_widget.setLayout(self.claims_table_layout)
 
         self.show_appeals()
+
+        self.claims_table_widget = QWidget()
+        self.claims_table_layout = QVBoxLayout()
+        self.claims_table_widget.setLayout(self.claims_table_layout)
 
         self.claims_table = QTableWidget()
         self.claims_table.setColumnCount(5)
@@ -170,8 +188,15 @@ class CustomerWindow(QWidget):
         self.claims_table.verticalHeader().setVisible(False)
         self.claims_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
 
+        self.refresh_button = QPushButton("")
+        self.refresh_button.setIcon(QIcon("img/refresh.png"))
+        self.refresh_button.clicked.connect(self.show_approved_applications)
+
         self.content_widget.addWidget(self.appeals_table_widget)
-        self.content_widget.addWidget(self.claims_table)
+        self.content_widget.addWidget(self.claims_table_widget)
+
+        self.claims_table_layout.addWidget(self.claims_table)
+        self.claims_table_layout.addWidget(self.refresh_button, alignment=Qt.AlignmentFlag.AlignRight)
 
         self.center()
 
@@ -268,6 +293,9 @@ class CustomerWindow(QWidget):
 
     def save_user_data(self):
         customer = Customer(id = self.customer_id, FIO = self.full_name_input.text(), address=  self.address_input.text(), number_phone= self.phone_input.text(), email= self.email_input.text())
+        if not customer.FIO or not customer.address or not customer.number_phone or not customer.email:
+            QMessageBox.warning(self, "Предупреждение", "Все поля должны быть заполнены")
+            return
         main_functions.update_full_information_customer(customer)
         self.show_user_data()
 
@@ -282,17 +310,17 @@ class CustomerWindow(QWidget):
         self.content_widget.setCurrentWidget(self.appeals_table_widget)
 
     def show_approved_applications(self):
-        claims_data = main_functions.load_claims(Customer(id = self.customer_id))
+        claims_data = main_functions.load_claims(Customer(id=self.customer_id))
         self.claims_table.setRowCount(len(claims_data))
         for row, claim in enumerate(claims_data):
             for col, item in enumerate(claim):
                 table_item = QTableWidgetItem(str(item))
-                table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)  # Установка выравнивания по центру
+                table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 self.claims_table.setItem(row, col, table_item)
-        self.content_widget.setCurrentWidget(self.claims_table)
+        self.content_widget.setCurrentWidget(self.claims_table_widget)
 
     def create_request(self):
-        self.create_appeal_form = CreateAppealForm(self.customer_id)
+        self.create_appeal_form = CreateAppealForm(self.customer_id, self)
         self.create_appeal_form.show()
 
     def change_password(self):
@@ -354,6 +382,7 @@ class ChangePasswordDialog(QDialog):
         layout.addLayout(buttons_layout)
 
         self.setLayout(layout)
+        self.center()
 
     def toggle_password_visibility(self, state):
         if state == Qt.CheckState.Checked.value:
@@ -369,11 +398,32 @@ class ChangePasswordDialog(QDialog):
         old_password = self.lineEdit_old_password.text()
         new_password = self.lineEdit_new_password.text()
         confirm_password = self.lineEdit_confirm_password.text()
-
-        self.close()
+        if old_password and new_password and confirm_password:
+            if len(new_password) > 7 and len(confirm_password) > 7:
+                if main_functions.checking_сurrent_client_password(Customer(id = self.customer_id), User(password = old_password)):
+                    if new_password != old_password:
+                        if new_password == confirm_password:
+                            if main_functions.update_current_client_password(Customer(id = self.customer_id), User(password = new_password)) == 200:
+                                QMessageBox.information(self, "Успех", "Аккаунт успешно зарегистрирован!")
+                                self.close()
+                        else:
+                            QMessageBox.warning(self, "Предупреждение", "Пароли не совпадают")
+                    else:
+                        QMessageBox.warning(self, "Предупреждение", "Новый пароль должен отличаться от старого")
+                else:
+                    QMessageBox.warning(self, "Предупреждение", "Неверно введен старый пароль")
+            else:
+                QMessageBox.warning(self, "Предупреждение", "Пароль должен состоять минимум из 8 символов")
+        else: 
+            QMessageBox.warning(self, "Предупреждение", "Все поля должны быть заполнены")
         
     def close_form(self):
         self.close()
+    
+    def center(self):
+        screen = QApplication.primaryScreen().geometry()
+        size = self.geometry()
+        self.move((screen.width() - size.width()) // 2, (screen.height() - size.height()) // 2)
 
 class CreateAppealForm(QDialog):
     def __init__(self, customer_id, parent=None):
@@ -469,17 +519,26 @@ class CreateAppealForm(QDialog):
         if self.checkbox_select_previous.isChecked():
             device = Device(id = main_functions.definition_previous_device(Customer(id= self.customer_id), Device(model= self.combobox_previous_devices.currentText())))
             appeal = Appeal(customer_id= self.customer_id, description = self.textEdit_description.toPlainText())
+            if not appeal.description:
+                QMessageBox.warning(self, "Предупреждение", "Все поля должны быть заполнены")
+                return
             result = main_functions.add_appeal(appeal, device, previous_device= True)
             if result == 200:
+                self.parent().show_appeals()
                 QMessageBox.information(self, "Успех", "Обращение создано!")
+
                 self.close()
             else:
                 QMessageBox.critical(self, "Ошибка", "Не удалось создать обращение.")
         else:
             device = Device(model = self.lineEdit_model.text(), serial_number = self.lineEdit_serial_number.text(), type_id= main_functions.type_device_definition(TypeDevice(name= self.comboBox_device_type.currentText())))
             appeal = Appeal(customer_id= self.customer_id ,description = self.textEdit_description.toPlainText())
+            if not appeal.description or not device.model or not device.serial_number:
+                QMessageBox.warning(self, "Предупреждение", "Все поля должны быть заполнены")
+                return
             result = main_functions.add_appeal(appeal, device)
             if result == 200:
+                self.parent().show_appeals()
                 QMessageBox.information(self, "Успех", "Обращение создано!")
                 self.close()
             else:

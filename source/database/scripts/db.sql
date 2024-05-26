@@ -79,3 +79,21 @@ CREATE TABLE tools_used (
     contract_id INTEGER REFERENCES contracts(id) ON DELETE CASCADE ON UPDATE CASCADE,
     tool_id INTEGER REFERENCES tools(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+CREATE TRIGGER IF NOT EXISTS set_start_date
+    AFTER INSERT ON claims
+    FOR EACH ROW
+    BEGIN
+        UPDATE claims
+        SET start_date = datetime('now')
+        WHERE id = NEW.id;
+    END;
+
+CREATE TRIGGER IF NOT EXISTS update_end_date
+    AFTER UPDATE OF status_id ON claims
+    WHEN NEW.status_id = (SELECT id FROM statuses WHERE name = 'Выполнено')
+    BEGIN
+        UPDATE claims
+        SET end_date = datetime('now')
+        WHERE id = NEW.id;
+    END;

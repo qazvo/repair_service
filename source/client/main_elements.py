@@ -184,4 +184,20 @@ class MainFunctions:
         result = db_manager.execute("""UPDATE customers SET FIO = ?, address = ?, number_phone = ?, email = ? WHERE id = ?""", args= (customer.FIO, customer.address, customer.number_phone, customer.email, customer.id))
         return result["code"]
     
+    def checking_сurrent_client_password(self, customer: Customer,  user: User):
+        result = db_manager.execute("""SELECT u.id
+                                        FROM customers c
+                                        JOIN users u ON c.user_id = u.id
+                                        WHERE c.id = ? AND u.password = ?""", args= (customer.id, user.password))
+        return result["data"]
+    
+    def update_current_client_password(self, customer: Customer,  user: User):
+        result = db_manager.execute("""UPDATE users SET password = ?
+                                        WHERE id = (
+                                        SELECT u.id
+                                        FROM customers c
+                                        JOIN users u ON c.user_id = u.id
+                                        WHERE c.id = ?);""", args= (user.password, customer.id))
+        return result["code"]
+    
 main_functions = MainFunctions(db_manager)
