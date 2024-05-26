@@ -103,6 +103,9 @@ class CustomerWindow(QWidget):
         sidebar_layout = QVBoxLayout()
         sidebar_widget.setLayout(sidebar_layout)
 
+        self.content_widget = QStackedWidget()
+        main_layout.addWidget(self.content_widget)
+
         logo_label = QLabel()
         pixmap = QPixmap("img/mastertechh.png")
         logo_label.setPixmap(pixmap)
@@ -307,6 +310,7 @@ class CustomerWindow(QWidget):
                 table_item = QTableWidgetItem(str(item))
                 table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)  # Установка выравнивания по центру
                 self.appeals_table.setItem(row, col, table_item)
+        self.content_widget.addWidget(self.appeals_table_widget)
         self.content_widget.setCurrentWidget(self.appeals_table_widget)
 
     def show_approved_applications(self):
@@ -317,6 +321,7 @@ class CustomerWindow(QWidget):
                 table_item = QTableWidgetItem(str(item))
                 table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 self.claims_table.setItem(row, col, table_item)
+        self.content_widget.addWidget(self.claims_table_widget)
         self.content_widget.setCurrentWidget(self.claims_table_widget)
 
     def create_request(self):
