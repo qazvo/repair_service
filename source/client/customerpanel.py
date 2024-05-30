@@ -125,8 +125,7 @@ class CustomerWindow(QWidget):
         profile_button.clicked.connect(self.show_user_data)
         sidebar_layout.addWidget(profile_button, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        small_spacer = QSpacerItem(20, 10, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
-        sidebar_layout.addItem(small_spacer)
+        sidebar_layout.addItem(QSpacerItem(20, 10, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed))
 
         requests_button = QPushButton("Мои обращения")
         requests_button.clicked.connect(self.show_appeals)
