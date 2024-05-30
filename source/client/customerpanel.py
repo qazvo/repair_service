@@ -308,7 +308,7 @@ class CustomerWindow(QWidget):
         for row, appeal in enumerate(appeals_data):
             for col, item in enumerate(appeal):
                 table_item = QTableWidgetItem(str(item))
-                table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)  # Установка выравнивания по центру
+                table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter) 
                 self.appeals_table.setItem(row, col, table_item)
         self.content_widget.addWidget(self.appeals_table_widget)
         self.content_widget.setCurrentWidget(self.appeals_table_widget)

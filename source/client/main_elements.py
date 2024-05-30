@@ -60,7 +60,7 @@ class Claim:
         self.status_id = status_id
     def to_json(self):
         return f'{{"id": "{self.id}""FIO": "{self.FIO}", "adress": "{self.adress}", "number_phone": {self.number_phone}, "email": {self.email}}}'
-    
+
 class MainFunctions:
     def __init__(self, db_manager):
         self.db_manager = db_manager
@@ -151,7 +151,7 @@ class MainFunctions:
             result_appeal = db_manager.execute("""INSERT INTO appeals(customer_id, device_id, description) VALUES (?, ?, ?)""", args= (appeal.customer_id, for_device_id["data"][0], appeal.description))
         return result_appeal["code"]
     
-    def definition_previous_device(self, customer: Customer, device: Device) -> tuple:
+    def definition_previous_device(self, customer: Customer, device: Device):
         result = db_manager.execute("""SELECT DISTINCT d.id
                                         FROM appeals a
                                         JOIN devices d ON a.device_id = d.id
@@ -198,6 +198,35 @@ class MainFunctions:
                                         FROM customers c
                                         JOIN users u ON c.user_id = u.id
                                         WHERE c.id = ?);""", args= (user.password, customer.id))
+        return result["code"]
+    
+    def load_all_appeals(self):
+        result = db_manager.execute("""SELECT a.id, c.FIO, d.model, a.description
+                                        FROM appeals a
+                                        JOIN devices d ON a.device_id = d.id
+                                        JOIN customers c ON a.customer_id = c.id
+                                        WHERE NOT EXISTS (
+                                            SELECT 1
+                                            FROM claims cl
+                                            WHERE cl.appeal_id = a.id
+                                            )""", many= True)
+        return result["data"]
+    
+    def load_all_claims(self):
+        result = db_manager.execute("""SELECT c.id, cus.FIO, d.model, a.description, c.start_date, c.end_date, s.name
+                                        FROM claims c
+                                        JOIN appeals a ON c.appeal_id = a.id
+                                        JOIN devices d ON a.device_id = d.id
+                                        JOIN customers cus ON a.customer_id = cus.id
+                                        JOIN statuses s ON c.status_id = s.id""", many= True)
+        return result["data"]
+    
+    def load_all_customers(self):
+        result = db_manager.execute("""SELECT id, FIO, address, number_phone, email FROM customers""", many= True)
+        return result["data"]
+    
+    def create_claim_from_appeal(self, appeal: Appeal):
+        result = db_manager.execute("""INSERT INTO claims (appeal_id) VALUES (?)""", args= (appeal.id,))
         return result["code"]
     
 main_functions = MainFunctions(db_manager)

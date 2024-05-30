@@ -3,8 +3,9 @@ from PyQt6.QtGui import QIcon
 from client.main_elements import User, main_functions, Customer
 from client.registration import RegisterWindow
 from client.adminpanel import AdminWindow
-from client.masterpanel import MasterWindow, ManagerWindow
+from client.masterpanel import MasterWindow
 from client.customerpanel import InformationAboutCustomer, CustomerWindow
+from client.managerpanel import ManagerWindow
 
 class LoginWindow(QMainWindow):
     def __init__(self):

@@ -97,3 +97,12 @@ CREATE TRIGGER IF NOT EXISTS update_end_date
         SET end_date = datetime('now')
         WHERE id = NEW.id;
     END;
+
+CREATE TRIGGER set_default_status_on_insert
+    AFTER INSERT ON claims
+    FOR EACH ROW
+    BEGIN
+        UPDATE claims
+        SET status_id = (SELECT id FROM statuses WHERE name = 'В ожидании')
+        WHERE id = NEW.id;
+    END;

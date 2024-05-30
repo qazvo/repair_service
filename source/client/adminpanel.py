@@ -9,7 +9,7 @@ from client.main_elements import User, main_functions, TypeUser
 class AdminWindow(QWidget):
     def __init__(self):
         super().__init__()
-
+            
         self.setWindowTitle("Панель администратора")
         self.setFixedSize(800, 600)
         self.setWindowIcon(QIcon('img/logo.png'))
@@ -70,13 +70,14 @@ class AdminWindow(QWidget):
     def load_user_data(self):
         result = main_functions.load_user_data()
         if result["code"] == 200 and result["data"]:
-            # Устанавливаем заголовки колонок
             self.table_model.setHorizontalHeaderLabels(["Номер аккаунта", "Логин", "Пароль", "Тип аккаунта"])
-            # Очищаем текущие данные модели
             self.table_model.removeRows(0, self.table_model.rowCount())
-            # Заполняем модель данными
             for user_data in result["data"]:
-                row = [QStandardItem(str(data)) for data in user_data]
+                row = []
+                for data in user_data:
+                    item = QStandardItem(str(data))
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)  # Выравнивание по центру
+                    row.append(item)
                 self.table_model.appendRow(row)
         else:
             QMessageBox.critical(self, "Ошибка", "Не удалось загрузить пользователей.")
