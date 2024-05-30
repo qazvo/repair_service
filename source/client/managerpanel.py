@@ -21,6 +21,10 @@ class ManagerWindow(QWidget):
         self.tab_widget = QTabWidget()
         main_layout.addWidget(self.tab_widget)
 
+        self.appeals_data = None
+        self.claims_data = None
+        self.clients_data = None
+
         self.init_appeals_tab()
         self.init_claims_tab()
         self.init_clients_tab()
@@ -28,6 +32,10 @@ class ManagerWindow(QWidget):
     def init_appeals_tab(self):
         self.appeals_tab = QWidget()
         self.appeals_layout = QVBoxLayout(self.appeals_tab)
+
+        self.search_appeals_line_edit = QLineEdit()
+        self.search_appeals_line_edit.setPlaceholderText("Поиск...")
+        self.search_appeals_line_edit.textChanged.connect(self.search_appeals)
 
         self.appeals_table = QTableWidget()
         self.appeals_table.setColumnCount(4)
@@ -54,6 +62,7 @@ class ManagerWindow(QWidget):
         appeals_buttons_layout.addStretch()
         appeals_buttons_layout.addWidget(self.update_appeals_button)
 
+        self.appeals_layout.addWidget(self.search_appeals_line_edit)
         self.appeals_layout.addWidget(self.appeals_table)
         self.appeals_layout.addLayout(appeals_buttons_layout)
 
@@ -64,6 +73,10 @@ class ManagerWindow(QWidget):
     def init_claims_tab(self):
         self.claims_tab = QWidget()
         self.claims_layout = QVBoxLayout(self.claims_tab)
+
+        self.search_claims_line_edit = QLineEdit()
+        self.search_claims_line_edit.setPlaceholderText("Поиск...")
+        self.search_claims_line_edit.textChanged.connect(self.search_claims)
 
         self.claims_table = QTableWidget()
         self.claims_table.setColumnCount(7)
@@ -84,6 +97,7 @@ class ManagerWindow(QWidget):
         claims_buttons_layout.addStretch()
         claims_buttons_layout.addWidget(self.update_claims_button)
 
+        self.claims_layout.addWidget(self.search_claims_line_edit)
         self.claims_layout.addWidget(self.claims_table)
         self.claims_layout.addLayout(claims_buttons_layout)
 
@@ -94,6 +108,10 @@ class ManagerWindow(QWidget):
     def init_clients_tab(self):
         self.clients_tab = QWidget()
         self.clients_layout = QVBoxLayout(self.clients_tab)
+
+        self.search_clients_line_edit = QLineEdit()
+        self.search_clients_line_edit.setPlaceholderText("Поиск...")
+        self.search_clients_line_edit.textChanged.connect(self.search_clients)
 
         self.clients_table = QTableWidget()
         self.clients_table.setColumnCount(5)
@@ -114,6 +132,7 @@ class ManagerWindow(QWidget):
         clients_buttons_layout.addStretch()
         clients_buttons_layout.addWidget(self.update_clients_button)
 
+        self.clients_layout.addWidget(self.search_clients_line_edit)
         self.clients_layout.addWidget(self.clients_table)
         self.clients_layout.addLayout(clients_buttons_layout)
 
@@ -123,6 +142,7 @@ class ManagerWindow(QWidget):
 
     def show_appeals(self):
         appeals_data = main_functions.load_all_appeals()
+        self.appeals_data = appeals_data
         self.appeals_table.setRowCount(len(appeals_data))
         for row, appeal in enumerate(appeals_data):
             for col, item in enumerate(appeal):
@@ -130,10 +150,27 @@ class ManagerWindow(QWidget):
                 table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 self.appeals_table.setItem(row, col, table_item)
 
+    def display_appeals(self, data):
+        self.appeals_table.setRowCount(len(data))
+        for row, appeal in enumerate(data):
+            for col, item in enumerate(appeal):
+                table_item = QTableWidgetItem(str(item))
+                table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                self.appeals_table.setItem(row, col, table_item)
+
     def show_claims(self):
         claims_data = main_functions.load_all_claims()
+        self.claims_data = claims_data
         self.claims_table.setRowCount(len(claims_data))
         for row, claim in enumerate(claims_data):
+            for col, item in enumerate(claim):
+                table_item = QTableWidgetItem(str(item))
+                table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                self.claims_table.setItem(row, col, table_item)
+    
+    def display_claims(self, data):
+        self.claims_table.setRowCount(len(data))
+        for row, claim in enumerate(data):
             for col, item in enumerate(claim):
                 table_item = QTableWidgetItem(str(item))
                 table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -141,12 +178,36 @@ class ManagerWindow(QWidget):
 
     def show_clients(self):
         clients_data = main_functions.load_all_customers()
+        self.clients_data = clients_data
         self.clients_table.setRowCount(len(clients_data))
         for row, client in enumerate(clients_data):
             for col, item in enumerate(client):
                 table_item = QTableWidgetItem(str(item))
                 table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 self.clients_table.setItem(row, col, table_item)
+    
+    def display_clients(self, data):
+        self.clients_table.setRowCount(len(data))
+        for row, client in enumerate(data):
+            for col, item in enumerate(client):
+                table_item = QTableWidgetItem(str(item))
+                table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                self.clients_table.setItem(row, col, table_item)
+
+    def search_appeals(self):
+        query = self.search_appeals_line_edit.text().lower()
+        filtered_data = [appeal for appeal in self.appeals_data if query in str(appeal).lower()]
+        self.display_appeals(filtered_data)
+
+    def search_claims(self):
+        query = self.search_claims_line_edit.text().lower()
+        filtered_data = [claim for claim in self.claims_data if query in str(claim).lower()]
+        self.display_claims(filtered_data)
+
+    def search_clients(self):
+        query = self.search_clients_line_edit.text().lower()
+        filtered_data = [client for client in self.clients_data if query in str(client).lower()]
+        self.display_clients(filtered_data)
 
     def create_claim_from_appeal(self):
         selected_row = self.appeals_table.currentRow()
