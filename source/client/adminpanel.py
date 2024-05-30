@@ -11,9 +11,13 @@ class AdminWindow(QWidget):
         super().__init__()
             
         self.setWindowTitle("Панель администратора")
-        self.setFixedSize(800, 600)
+        self.setFixedSize(1100, 700)
         self.setWindowIcon(QIcon('img/logo.png'))
 
+        self.search_edit = QLineEdit()
+        self.search_edit.setPlaceholderText("Поиск...")
+        self.search_edit.textChanged.connect(self.filter_table)
+        
         self.table_view = QTableView()
         self.table_model = QStandardItemModel()
         self.table_view.setModel(self.table_model)
@@ -23,6 +27,8 @@ class AdminWindow(QWidget):
         self.table_view.setAlternatingRowColors(True)
         self.table_view.setEditTriggers(QTableView.EditTrigger.NoEditTriggers)
         self.table_view.verticalHeader().setVisible(False)
+
+        self.table_data = None
 
         # Загружаем данные пользователей из базы данных
         self.load_user_data()
@@ -55,11 +61,11 @@ class AdminWindow(QWidget):
         # Создаем групповой блок для управления пользователями
         group_box = QGroupBox("Управление пользователями")
         group_box_layout = QVBoxLayout()
+        group_box_layout.addWidget(self.search_edit)
         group_box_layout.addWidget(self.table_view)
         group_box_layout.addLayout(button_layout)
         group_box.setLayout(group_box_layout)
 
-        # Главная компоновка
         main_layout = QVBoxLayout()
         main_layout.addWidget(group_box)
         self.setLayout(main_layout)
@@ -69,17 +75,15 @@ class AdminWindow(QWidget):
 
     def load_user_data(self):
         result = main_functions.load_user_data()
-        if result["code"] == 200 and result["data"]:
-            self.table_model.setHorizontalHeaderLabels(["Номер аккаунта", "Логин", "Пароль", "Тип аккаунта"])
-            self.table_model.removeRows(0, self.table_model.rowCount())
-            for user_data in result["data"]:
-                row = []
-                for data in user_data:
-                    item = QStandardItem(str(data))
-                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)  # Выравнивание по центру
-                    row.append(item)
-                self.table_model.appendRow(row)
-        else:
+        self.table_data = result["data"] if result["code"] == 200 else []
+        self.table_model.clear()
+        self.table_model.setHorizontalHeaderLabels(["Номер аккаунта", "Логин", "Пароль", "Тип аккаунта"])
+        for user_data in self.table_data:
+            row = [QStandardItem(str(item)) for item in user_data]
+            for item in row:
+                item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.table_model.appendRow(row)
+        if result["code"] != 200:
             QMessageBox.critical(self, "Ошибка", "Не удалось загрузить пользователей.")
 
     def add_user(self):
@@ -110,6 +114,19 @@ class AdminWindow(QWidget):
                     QMessageBox.critical(self, "Ошибка", "Не удалось удалить пользователя.")
         else:
             QMessageBox.warning(self, "Предупреждение", "Пожалуйста, выберите пользователя.")
+
+    def display_users(self, data):
+        self.table_model.setRowCount(0)
+        for user_data in data:
+            row = [QStandardItem(str(item)) for item in user_data]
+            for item in row:
+                item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.table_model.appendRow(row)
+
+    def filter_table(self):
+        query = self.search_edit.text().lower()
+        filtered_data = [data for data in self.table_data if query in str(data).lower()]
+        self.display_users(filtered_data)
 
     def center(self):
         # Получаем размеры экрана

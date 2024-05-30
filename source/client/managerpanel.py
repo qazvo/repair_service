@@ -1,10 +1,9 @@
 from PyQt6.QtWidgets import (
-    QTableWidget, QTableWidgetItem, QHeaderView, QTableView, QWidget, QLabel,
-    QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QFormLayout,
-    QDialog, QTabWidget, QTextEdit, QStackedWidget, QSizePolicy, QSpacerItem, QComboBox, QMessageBox
+    QTableWidget, QTableWidgetItem, QHeaderView, QTableView, QWidget,
+    QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QTabWidget, QMessageBox
 )
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont, QIcon, QPixmap
+from PyQt6.QtGui import QIcon
 
 from client.main_elements import main_functions, Appeal
 
@@ -13,7 +12,7 @@ class ManagerWindow(QWidget):
         super().__init__()
 
         self.setWindowTitle("Панель менеджера по заявкам")
-        self.setGeometry(100, 100, 1200, 800)
+        self.setGeometry(100, 100, 1100, 700)
         self.setWindowIcon(QIcon('img/logo.png'))
 
         main_layout = QVBoxLayout(self)
@@ -141,10 +140,9 @@ class ManagerWindow(QWidget):
         self.show_clients()
 
     def show_appeals(self):
-        appeals_data = main_functions.load_all_appeals()
-        self.appeals_data = appeals_data
-        self.appeals_table.setRowCount(len(appeals_data))
-        for row, appeal in enumerate(appeals_data):
+        self.appeals_data = main_functions.load_all_appeals()
+        self.appeals_table.setRowCount(len(self.appeals_data))
+        for row, appeal in enumerate(self.appeals_data):
             for col, item in enumerate(appeal):
                 table_item = QTableWidgetItem(str(item))
                 table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -159,10 +157,9 @@ class ManagerWindow(QWidget):
                 self.appeals_table.setItem(row, col, table_item)
 
     def show_claims(self):
-        claims_data = main_functions.load_all_claims()
-        self.claims_data = claims_data
-        self.claims_table.setRowCount(len(claims_data))
-        for row, claim in enumerate(claims_data):
+        self.claims_data = main_functions.load_all_claims()
+        self.claims_table.setRowCount(len(self.claims_data))
+        for row, claim in enumerate(self.claims_data):
             for col, item in enumerate(claim):
                 table_item = QTableWidgetItem(str(item))
                 table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -177,10 +174,9 @@ class ManagerWindow(QWidget):
                 self.claims_table.setItem(row, col, table_item)
 
     def show_clients(self):
-        clients_data = main_functions.load_all_customers()
-        self.clients_data = clients_data
-        self.clients_table.setRowCount(len(clients_data))
-        for row, client in enumerate(clients_data):
+        self.clients_data = main_functions.load_all_customers()
+        self.clients_table.setRowCount(len(self.clients_data))
+        for row, client in enumerate(self.clients_data):
             for col, item in enumerate(client):
                 table_item = QTableWidgetItem(str(item))
                 table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)

@@ -1,6 +1,9 @@
-from PyQt6.QtWidgets import QTableWidgetItem, QHeaderView, QTableView, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QMessageBox, QFormLayout, QDialog, QListWidget, QInputDialog, QApplication, QSizePolicy, QSpacerItem, QComboBox, QTextEdit, QCheckBox, QStackedWidget, QTableWidget
+from PyQt6.QtWidgets import (
+    QTableWidgetItem, QHeaderView, QTableView, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QMessageBox, QFormLayout, QDialog,
+    QApplication, QSizePolicy, QSpacerItem, QComboBox, QTextEdit, QCheckBox, QStackedWidget, QTableWidget
+)
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QStandardItemModel, QFont, QIcon, QPixmap
+from PyQt6.QtGui import QFont, QIcon, QPixmap
 from client.main_elements import Customer, main_functions, Appeal, Device, TypeDevice, User
 
 class InformationAboutCustomer(QWidget):
@@ -93,7 +96,7 @@ class CustomerWindow(QWidget):
         self.customer_id = customer_id
 
         self.setWindowTitle("Панель пользователя")
-        self.setFixedSize(1100, 600)
+        self.setFixedSize(1125, 650)
         self.setWindowIcon(QIcon('img/logo.png'))
 
         main_layout = QHBoxLayout()

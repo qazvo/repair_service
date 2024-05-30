@@ -1,5 +1,4 @@
 from database.db_manager import db_manager
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QMessageBox, QHBoxLayout, QSpacerItem, QSizePolicy
 
 class User:
     def __init__(self, id: int = None, login: str = None,  password: str = None, type_id: int = None):
