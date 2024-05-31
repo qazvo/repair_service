@@ -157,16 +157,23 @@ class CustomerWindow(QWidget):
         self.appeals_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
 
         self.create_appeal_button = QPushButton("Создать обращение")
-        self.create_appeal_button.setFixedSize(800, 24)
+        self.create_appeal_button.setFixedSize(400, 28)
+        self.create_appeal_button.setIcon(QIcon("img/add.png"))
         self.create_appeal_button.clicked.connect(self.create_request)
 
+        self.delete_appeal_button = QPushButton("Удалить обращение")
+        self.delete_appeal_button.setFixedSize(400, 28)
+        self.delete_appeal_button.setIcon(QIcon("img/delete.png"))
+        self.delete_appeal_button.clicked.connect(self.delete_appeal)
+
         self.refresh_appeals_button = QPushButton("")
-        self.refresh_appeals_button.setFixedSize(28, 24)
+        self.refresh_appeals_button.setFixedSize(28, 28)
         self.refresh_appeals_button.setIcon(QIcon("img/refresh.png"))
         self.refresh_appeals_button.clicked.connect(self.show_appeals)
 
         button_layout = QHBoxLayout()
         button_layout.addWidget(self.create_appeal_button)
+        button_layout.addWidget(self.delete_appeal_button)
         button_layout.addWidget(self.refresh_appeals_button)
 
         self.appeals_table_layout.addWidget(self.appeals_table)
@@ -194,6 +201,7 @@ class CustomerWindow(QWidget):
         self.claims_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
 
         self.refresh_button = QPushButton("")
+        self.refresh_button.setFixedSize(28, 28)
         self.refresh_button.setIcon(QIcon("img/refresh.png"))
         self.refresh_button.clicked.connect(self.show_approved_applications)
 
@@ -333,6 +341,19 @@ class CustomerWindow(QWidget):
     def change_password(self):
         change_password_dialog = ChangePasswordDialog(self.customer_id, self)
         change_password_dialog.show()
+
+    def delete_appeal(self):
+        selected_row = self.appeals_table.currentRow()
+        if selected_row == -1:
+            QMessageBox.warning(self, "Предупреждение", "Пожалуйста, выберите обращение.")
+            return
+        appeal = Appeal(id = self.appeals_table.item(selected_row, 0).text())
+        response = main_functions.delete_appeal(appeal)
+        if response == 200:
+            QMessageBox.information(self, "Успех", "Обращение удалено")
+            self.show_appeals()
+        else:
+            QMessageBox.warning(self, "Ошибка", "Не удалось удалить обращение")
 
     def center(self):
         screen = QApplication.primaryScreen().geometry()

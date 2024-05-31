@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import (
     QTableWidget, QTableWidgetItem, QHeaderView, QTableView, QWidget,
-    QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QTabWidget, QMessageBox
+    QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QTabWidget, QMessageBox, QApplication
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
@@ -12,7 +12,7 @@ class ManagerWindow(QWidget):
         super().__init__()
 
         self.setWindowTitle("Панель менеджера по заявкам")
-        self.setGeometry(100, 100, 1100, 700)
+        self.setFixedSize(1100, 700)
         self.setWindowIcon(QIcon('img/logo.png'))
 
         main_layout = QVBoxLayout(self)
@@ -49,6 +49,7 @@ class ManagerWindow(QWidget):
         self.create_claim_button = QPushButton("Создать заявку")
         self.create_claim_button.setFixedHeight(30)
         self.create_claim_button.setMinimumWidth(100)
+        self.create_claim_button.setIcon(QIcon("img/add.png"))
         self.create_claim_button.clicked.connect(self.create_claim_from_appeal)
 
         self.update_appeals_button = QPushButton()
@@ -56,8 +57,15 @@ class ManagerWindow(QWidget):
         self.update_appeals_button.setIcon(QIcon('img/refresh.png'))
         self.update_appeals_button.clicked.connect(self.show_appeals)
 
+        self.delete_appeal_button = QPushButton("Удалить обращение")
+        self.delete_appeal_button.setFixedHeight(30)
+        self.delete_appeal_button.setMinimumWidth(100)
+        self.delete_appeal_button.setIcon(QIcon("img/delete.png"))
+        self.delete_appeal_button.clicked.connect(self.delete_appeal)
+
         appeals_buttons_layout = QHBoxLayout()
         appeals_buttons_layout.addWidget(self.create_claim_button)
+        appeals_buttons_layout.addWidget(self.delete_appeal_button)
         appeals_buttons_layout.addStretch()
         appeals_buttons_layout.addWidget(self.update_appeals_button)
 
@@ -139,6 +147,8 @@ class ManagerWindow(QWidget):
 
         self.show_clients()
 
+        self.center()
+
     def show_appeals(self):
         self.appeals_data = main_functions.load_all_appeals()
         self.appeals_table.setRowCount(len(self.appeals_data))
@@ -217,3 +227,21 @@ class ManagerWindow(QWidget):
             QMessageBox.warning(self, "Провал", "Неудалось сформировать заявку")
         self.show_claims()
         self.show_appeals()
+    
+    def delete_appeal(self):
+        selected_row = self.appeals_table.currentRow()
+        if selected_row == -1:
+            QMessageBox.warning(self, "Предупреждение", "Пожалуйста, выберите обращение.")
+            return
+        appeal = Appeal(id = self.appeals_table.item(selected_row, 0).text())
+        response = main_functions.delete_appeal(appeal)
+        if response == 200:
+            QMessageBox.information(self, "Успех", "Обращение удалено")
+            self.show_appeals()
+        else:
+            QMessageBox.warning(self, "Ошибка", "Не удалось удалить обращение")
+
+    def center(self):
+        screen = QApplication.primaryScreen().geometry()
+        size = self.geometry()
+        self.move((screen.width() - size.width()) // 2, (screen.height() - size.height()) // 2)

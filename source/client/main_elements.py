@@ -162,8 +162,11 @@ class MainFunctions:
         result = db_manager.execute("""SELECT a.id, d.model, a.description 
                                     FROM appeals a
                                     JOIN devices d ON a.device_id = d.id
-                                    WHERE a.customer_id = ?
-                                    """, (customer.id,), many=True)
+                                    WHERE a.customer_id = ? AND NOT EXISTS (
+                                                                SELECT 1
+                                                                FROM claims cl
+                                                                WHERE cl.appeal_id = a.id
+                                                                )""", (customer.id,), many=True)
         return result["data"]
     
     def load_claims(self, customer: Customer):
@@ -205,10 +208,10 @@ class MainFunctions:
                                         JOIN devices d ON a.device_id = d.id
                                         JOIN customers c ON a.customer_id = c.id
                                         WHERE NOT EXISTS (
-                                            SELECT 1
-                                            FROM claims cl
-                                            WHERE cl.appeal_id = a.id
-                                            )""", many= True)
+                                                SELECT 1
+                                                FROM claims cl
+                                                WHERE cl.appeal_id = a.id
+                                                )""", many= True)
         return result["data"]
     
     def load_all_claims(self):
@@ -226,6 +229,10 @@ class MainFunctions:
     
     def create_claim_from_appeal(self, appeal: Appeal):
         result = db_manager.execute("""INSERT INTO claims (appeal_id) VALUES (?)""", args= (appeal.id,))
+        return result["code"]
+
+    def delete_appeal(self, appeal: Appeal):
+        result = db_manager.execute("""DELETE FROM appeals WHERE id = ?""", args= (appeal.id,))
         return result["code"]
     
 main_functions = MainFunctions(db_manager)
