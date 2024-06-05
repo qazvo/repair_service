@@ -6,8 +6,6 @@ class User:
         self.login = login
         self.password = password
         self.type_id = type_id
-    def to_json(self):
-        return f'{{"id": "{self.id}""login": "{self.login}", "password": "{self.password}", "type_id": {self.type_id}}}'
     
 class Device:
     def __init__(self, id: int = None, type_id: int = None,  model: str = None, serial_number: str = None):
@@ -15,8 +13,6 @@ class Device:
         self.type_id = type_id
         self.model = model
         self.serial_number = serial_number
-    def to_json(self):
-        return f'{{"id": "{self.id}""type_id": "{self.type_id}", "model": "{self.model}", "serial_number": {self.serial_number}}}'
     
 class Appeal:
     def __init__(self, id: int = None, customer_id: int = None,  device_id: int = None, description: str = None):
@@ -24,8 +20,6 @@ class Appeal:
         self.customer_id = customer_id
         self.device_id = device_id
         self.description = description
-    def to_json(self):
-        return f'{{"id": "{self.id}""type_id": "{self.type_id}", "model": "{self.model}", "serial_number": {self.serial_number}}}'
     
 class Customer:
     def __init__(self, id: int = None, FIO: str = None,  address: str = None, number_phone: str = None, email: str = None):
@@ -34,22 +28,17 @@ class Customer:
         self.address = address
         self.number_phone = number_phone
         self.email = email
-    def to_json(self):
-        return f'{{"id": "{self.id}""FIO": "{self.FIO}", "adress": "{self.adress}", "number_phone": {self.number_phone}, "email": {self.email}}}'
     
 class TypeUser:
     def __init__(self, id: int = None, name: str = None):
         self.id = id
         self.name = name
-    def to_json(self):
-        return f'{{"id": "{self.id}""name": "{self.name}"}}'
     
 class TypeDevice:
     def __init__(self, id: int = None, name: str = None):
         self.id = id
         self.name = name
-    def to_json(self):
-        return f'{{"id": "{self.id}""name": "{self.name}"}}'
+
 class Claim:
     def __init__(self, id: int = None, appeal_id: int = None,  start_date: str = None, end_date: str = None, status_id: int = None):
         self.id = id
@@ -57,8 +46,35 @@ class Claim:
         self.start_date = start_date
         self.end_date = end_date
         self.status_id = status_id
-    def to_json(self):
-        return f'{{"id": "{self.id}""FIO": "{self.FIO}", "adress": "{self.adress}", "number_phone": {self.number_phone}, "email": {self.email}}}'
+
+class Contract:
+    def __init__(self, id: int = None, employee_id: int = None, claim_id: int = None, description_work_done: str = None, cost: float = None):
+        self.id = id
+        self.employee_id = employee_id
+        self.claim_id = claim_id
+        self.description_work_done = description_work_done
+        self.cost = cost
+
+class Employee:
+    def __init__(self, id: int = None, FIO: str = None, post_id: int = None):
+        self.id = id
+        self.FIO = FIO
+        self.post_id = post_id
+
+class Status:
+    def __init__(self, id: int = None, name: str = None):
+        self.id = id
+        self.name = name
+
+class Tool:
+    def __init__(self, id: int = None, name: str = None):
+        self.id = id
+        self.name = name
+
+class ToolUsed:
+    def __init__(self, contract_id: int = None, tool_id: int = None):
+        self.contract_id = contract_id
+        self.tool_id = tool_id
 
 class MainFunctions:
     def __init__(self, db_manager):
@@ -233,6 +249,69 @@ class MainFunctions:
 
     def delete_appeal(self, appeal: Appeal):
         result = db_manager.execute("""DELETE FROM appeals WHERE id = ?""", args= (appeal.id,))
+        return result["code"]
+    
+    def load_all_contracts(self):
+        result = db_manager.execute("""SELECT 
+                                        contracts.id AS contract_id,
+                                        employees.FIO AS employee_name,
+                                        claims.id AS claim_id,
+                                        contracts.description_work_done AS work_description,
+                                        contracts.cost AS cost,
+                                        GROUP_CONCAT(tools.name, ', ') AS used_tools
+                                        FROM contracts
+                                        JOIN 
+                                        employees ON contracts.employee_id = employees.id
+                                        JOIN 
+                                        claims ON contracts.claim_id = claims.id
+                                        LEFT JOIN 
+                                        tools_used ON contracts.id = tools_used.contract_id
+                                        LEFT JOIN 
+                                        tools ON tools_used.tool_id = tools.id
+                                        GROUP BY 
+                                        contracts.id""", many= True)
+        return result["data"]
+    
+    def load_all_masters(self):
+        result = db_manager.execute("""SELECT e.FIO FROM employees e
+                                        JOIN posts p ON e.post_id = p.id
+                                        WHERE p.name = 'Мастер' """, many= True)
+        return result["data"]
+    
+    def employee_definition(self, employee: Employee) -> int:
+        result = db_manager.execute("""SELECT id FROM employees WHERE FIO = ?""", args= (employee.FIO,))
+        return result["data"][0]
+
+    def create_contract(self, contract: Contract):
+        result = db_manager.execute("""INSERT INTO contracts (claim_id, employee_id, cost) VALUES (?, ?, ?)""", args= (contract.claim_id, contract.employee_id, contract.cost))
+        return result["code"]
+    
+    def load_statuses(self):
+        result = db_manager.execute("""SELECT name FROM statuses""", many= True)
+        return result["data"]
+    
+    def status_definition(self, status: Status) -> int:
+        result = db_manager.execute("""SELECT id FROM statuses WHERE name = ?""", args= (status.name,))
+        return result["data"][0]
+    
+    def update_status_in_claim(self, claim: Claim):
+        result = db_manager.execute("""UPDATE claims SET status_id = ? WHERE id = ?""", args= (claim.status_id, claim.id))
+        return result["code"]
+    
+    def update_description_in_contract(self, contract: Contract):
+        result = db_manager.execute("""UPDATE contracts SET description_work_done = ? WHERE id = ?""", args= (contract.description_work_done, contract.id))
+        return result["code"]
+
+    def tool_definition(self, tool: Tool) -> int:
+        result = db_manager.execute("""SELECT id FROM tools WHERE name = ?""", args= (tool.name,))
+        return result["data"][0]
+    
+    def load_tools(self):
+        result = db_manager.execute("""SELECT name FROM tools""", many= True)
+        return result["data"]
+    
+    def add_tool(self, toolused: ToolUsed):
+        result = db_manager.execute("""INSERT INTO tools_used (contract_id, tool_id) VALUES (?, ?)""", args= (toolused.contract_id, toolused.tool_id))
         return result["code"]
     
 main_functions = MainFunctions(db_manager)

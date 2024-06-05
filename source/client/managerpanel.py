@@ -151,52 +151,40 @@ class ManagerWindow(QWidget):
 
     def show_appeals(self):
         self.appeals_data = main_functions.load_all_appeals()
-        self.appeals_table.setRowCount(len(self.appeals_data))
-        for row, appeal in enumerate(self.appeals_data):
-            for col, item in enumerate(appeal):
-                table_item = QTableWidgetItem(str(item))
-                table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-                self.appeals_table.setItem(row, col, table_item)
+        if self.appeals_data:
+            self.display_appeals(self.appeals_data)
 
     def display_appeals(self, data):
         self.appeals_table.setRowCount(len(data))
         for row, appeal in enumerate(data):
             for col, item in enumerate(appeal):
-                table_item = QTableWidgetItem(str(item))
+                table_item = QTableWidgetItem("" if item is None else str(item))
                 table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 self.appeals_table.setItem(row, col, table_item)
 
     def show_claims(self):
         self.claims_data = main_functions.load_all_claims()
-        self.claims_table.setRowCount(len(self.claims_data))
-        for row, claim in enumerate(self.claims_data):
-            for col, item in enumerate(claim):
-                table_item = QTableWidgetItem(str(item))
-                table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-                self.claims_table.setItem(row, col, table_item)
+        if self.claims_data:
+            self.display_claims(self.claims_data)
     
     def display_claims(self, data):
         self.claims_table.setRowCount(len(data))
         for row, claim in enumerate(data):
             for col, item in enumerate(claim):
-                table_item = QTableWidgetItem(str(item))
+                table_item = QTableWidgetItem("" if item is None else str(item))
                 table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 self.claims_table.setItem(row, col, table_item)
 
     def show_clients(self):
         self.clients_data = main_functions.load_all_customers()
-        self.clients_table.setRowCount(len(self.clients_data))
-        for row, client in enumerate(self.clients_data):
-            for col, item in enumerate(client):
-                table_item = QTableWidgetItem(str(item))
-                table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-                self.clients_table.setItem(row, col, table_item)
+        if self.clients_data:
+            self.display_clients(self.clients_data)
     
     def display_clients(self, data):
         self.clients_table.setRowCount(len(data))
         for row, client in enumerate(data):
             for col, item in enumerate(client):
-                table_item = QTableWidgetItem(str(item))
+                table_item = QTableWidgetItem("" if item is None else str(item))
                 table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 self.clients_table.setItem(row, col, table_item)
 

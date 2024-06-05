@@ -24,3 +24,16 @@ INSERT INTO types_devices (name) VALUES ('Смартфон');
 INSERT INTO types_devices (name) VALUES ('Стиральная машина');
 INSERT INTO types_devices (name) VALUES ('Ноутбук');
 INSERT INTO types_devices (name) VALUES ('Пылесос');
+
+-- Добавление должностей сотрудников
+INSERT INTO posts (name) VALUES ('Мастер');
+INSERT INTO posts (name) VALUES ('Менеджер');
+
+-- Добавление сотрудников 
+INSERT INTO employees (FIO, post_id) VALUES ('Архипов С.А.', 1);
+INSERT INTO employees (FIO, post_id) VALUES ('Шнейдер С.А.', 2);
+INSERT INTO employees (FIO, post_id) VALUES ('Кириллов С.А.', 1);
+INSERT INTO employees (FIO, post_id) VALUES ('Курбанов С.А.', 2);
+
+
+
