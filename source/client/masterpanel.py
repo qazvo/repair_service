@@ -11,7 +11,7 @@ class MasterWindow(QWidget):
         super().__init__()
 
         self.setWindowTitle("Панель мастера")
-        self.setGeometry(100, 100, 1200, 800)
+        self.setFixedSize(1200, 800)
         self.setWindowIcon(QIcon('img/logo.png'))
 
         main_layout = QVBoxLayout(self)
@@ -228,30 +228,32 @@ class CreateContractDialog(QDialog):
         super().__init__(parent)
         self.claim_id = claim_id
 
-        self.setWindowTitle("Создание контракта")
-        self.layout = QFormLayout(self)
+        self.setFixedSize(400, 100)
 
+        self.setWindowTitle("Создание контракта")
+        self.layout = QVBoxLayout(self)
+
+        form_layout = QFormLayout()
         self.employee_combobox = QComboBox()
-        employee = main_functions.load_all_masters()
-        employees = [emp[0] for emp in employee]
-        self.employee_combobox.addItems(employees)
+        employees = main_functions.load_all_masters()
+        employee_names = [emp[0] for emp in employees]
+        self.employee_combobox.addItems(employee_names)
 
         self.cost_line_edit = QLineEdit()
+        form_layout.addRow("Сотрудник:", self.employee_combobox)
+        form_layout.addRow("Стоимость:", self.cost_line_edit)
+        self.layout.addLayout(form_layout)
 
+        button_layout = QHBoxLayout()
         self.save_button = QPushButton("Сохранить")
         self.save_button.clicked.connect(self.save_contract)
-
-        self.layout.addRow("Сотрудник:", self.employee_combobox)
-        self.layout.addRow("Стоимость:", self.cost_line_edit)
-        self.layout.addWidget(self.save_button)
+        button_layout.addWidget(self.save_button)
+        self.layout.addLayout(button_layout)
 
     def save_contract(self):
         employee_name = self.employee_combobox.currentText()
-        employee_id = main_functions.employee_definition(Employee(FIO=employee_name))
         cost = self.cost_line_edit.text()
-        if not cost:
-            QMessageBox.warning(self, "Ошибка", "Пожалуйста, укажите стоимость")
-            return
+        employee_id = main_functions.employee_definition(Employee(FIO=employee_name))
         contract = Contract(claim_id=self.claim_id, employee_id=employee_id, cost=cost)
         response = main_functions.create_contract(contract)
         if response == 200:
@@ -267,22 +269,24 @@ class EditDescriptionDialog(QDialog):
         super().__init__(parent)
         self.contract_id = contract_id
 
+        self.setFixedSize(400, 80)
+
         self.setWindowTitle("Изменение описания")
-        self.layout = QFormLayout(self)
+        self.layout = QVBoxLayout(self)
 
+        form_layout = QFormLayout()
         self.description_edit = QLineEdit()
+        form_layout.addRow("Описание:", self.description_edit)
+        self.layout.addLayout(form_layout)
 
+        button_layout = QHBoxLayout()
         self.save_button = QPushButton("Сохранить")
         self.save_button.clicked.connect(self.save_description)
-
-        self.layout.addRow("Описание:", self.description_edit)
-        self.layout.addWidget(self.save_button)
+        button_layout.addWidget(self.save_button)
+        self.layout.addLayout(button_layout)
 
     def save_description(self):
         description = self.description_edit.text()
-        if not description:
-            QMessageBox.warning(self, "Ошибка", "Пожалуйста, укажите описание")
-            return
         contract = Contract(id=self.contract_id, description_work_done=description)
         response = main_functions.update_description_in_contract(contract)
         if response == 200:
@@ -298,19 +302,25 @@ class AttachToolDialog(QDialog):
         super().__init__(parent)
         self.contract_id = contract_id
 
-        self.setWindowTitle("Прикрепление инструмента")
-        self.layout = QFormLayout(self)
+        self.setFixedSize(400, 80)
 
+        self.setWindowTitle("Прикрепление инструмента")
+        self.layout = QVBoxLayout(self)
+
+        form_layout = QFormLayout()
         self.tool_combobox = QComboBox()
         tool = main_functions.load_tools()
         tools = [tl[0] for tl in tool]
         self.tool_combobox.addItems(tools)
 
+        form_layout.addRow("Инструмент:", self.tool_combobox)
+        self.layout.addLayout(form_layout)
+
+        button_layout = QHBoxLayout()
         self.save_button = QPushButton("Сохранить")
         self.save_button.clicked.connect(self.save_tool)
-
-        self.layout.addRow("Инструмент:", self.tool_combobox)
-        self.layout.addWidget(self.save_button)
+        button_layout.addWidget(self.save_button)
+        self.layout.addLayout(button_layout)
 
     def save_tool(self):
         tool_name = self.tool_combobox.currentText()
