@@ -14,26 +14,30 @@ INSERT INTO statuses (name) VALUES ('В ожидании');
 INSERT INTO statuses (name) VALUES ('В работе');
 INSERT INTO statuses (name) VALUES ('Выполнено');
 
--- Добавление инструментария
-INSERT INTO tools (name) VALUES ('Паяльная станция');
-INSERT INTO tools (name) VALUES ('Ремонтный фен');
-INSERT INTO tools (name) VALUES ('Диагностическая станция');
+-- Добавление компонентов
+INSERT INTO components (name) VALUES ('Экран');
+INSERT INTO components (name) VALUES ('Плата');
+INSERT INTO components (name) VALUES ('Панель управления');
+INSERT INTO components (name) VALUES ('Мотор');
 
 -- Добавление типов устройств 
 INSERT INTO types_devices (name) VALUES ('Смартфон');
 INSERT INTO types_devices (name) VALUES ('Стиральная машина');
 INSERT INTO types_devices (name) VALUES ('Ноутбук');
 INSERT INTO types_devices (name) VALUES ('Пылесос');
+INSERT INTO types_devices (name) VALUES ('Холодильник');
+INSERT INTO types_devices (name) VALUES ('ПК');
+INSERT INTO types_devices (name) VALUES ('Микроволновка');
 
 -- Добавление должностей сотрудников
 INSERT INTO posts (name) VALUES ('Мастер');
 INSERT INTO posts (name) VALUES ('Менеджер');
 
 -- Добавление сотрудников 
-INSERT INTO employees (FIO, post_id) VALUES ('Архипов С.А.', 1);
-INSERT INTO employees (FIO, post_id) VALUES ('Шнейдер С.А.', 2);
-INSERT INTO employees (FIO, post_id) VALUES ('Кириллов С.А.', 1);
-INSERT INTO employees (FIO, post_id) VALUES ('Курбанов С.А.', 2);
+INSERT INTO employees (FIO, post_id, user_id) VALUES ('Архипов С.А.', 1, 2);
+INSERT INTO employees (FIO, post_id, user_id) VALUES ('Шнейдер С.А.', 2, 2);
+INSERT INTO employees (FIO, post_id, user_id) VALUES ('Кириллов С.А.', 1, 2);
+INSERT INTO employees (FIO, post_id, user_id) VALUES ('Курбанов С.А.', 2, 2);
 
 
 

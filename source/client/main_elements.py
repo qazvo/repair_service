@@ -258,16 +258,16 @@ class MainFunctions:
                                         claims.id AS claim_id,
                                         contracts.description_work_done AS work_description,
                                         contracts.cost AS cost,
-                                        GROUP_CONCAT(tools.name, ', ') AS used_tools
+                                        GROUP_CONCAT(components.name, ', ') AS used_tools
                                         FROM contracts
                                         JOIN 
                                         employees ON contracts.employee_id = employees.id
                                         JOIN 
                                         claims ON contracts.claim_id = claims.id
                                         LEFT JOIN 
-                                        tools_used ON contracts.id = tools_used.contract_id
+                                        components_used ON contracts.id = components_used.contract_id
                                         LEFT JOIN 
-                                        tools ON tools_used.tool_id = tools.id
+                                        components ON components_used.component_id = components.id
                                         GROUP BY 
                                         contracts.id""", many= True)
         return result["data"]
@@ -303,15 +303,15 @@ class MainFunctions:
         return result["code"]
 
     def tool_definition(self, tool: Tool) -> int:
-        result = db_manager.execute("""SELECT id FROM tools WHERE name = ?""", args= (tool.name,))
+        result = db_manager.execute("""SELECT id FROM components WHERE name = ?""", args= (tool.name,))
         return result["data"][0]
     
-    def load_tools(self):
-        result = db_manager.execute("""SELECT name FROM tools""", many= True)
+    def load_components(self):
+        result = db_manager.execute("""SELECT name FROM components""", many= True)
         return result["data"]
     
-    def add_tool(self, toolused: ToolUsed):
-        result = db_manager.execute("""INSERT INTO tools_used (contract_id, tool_id) VALUES (?, ?)""", args= (toolused.contract_id, toolused.tool_id))
+    def add_component(self, toolused: ToolUsed):
+        result = db_manager.execute("""INSERT INTO components_used (contract_id, component_id) VALUES (?, ?)""", args= (toolused.contract_id, toolused.tool_id))
         return result["code"]
     
 main_functions = MainFunctions(db_manager)

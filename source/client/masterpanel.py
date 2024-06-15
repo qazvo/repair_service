@@ -135,20 +135,20 @@ class MasterWindow(QWidget):
     def show_claims(self):
         self.claims_data = main_functions.load_all_claims()
         if self.claims_data:
-            self.display_claims(self.claims_data, self.claims_table)
+            self.display_claims(self.claims_data)
 
     def show_contracts(self):
         self.contracts_data = main_functions.load_all_contracts()
         if self.contracts_data:
             self.display_contracts(self.contracts_data)
 
-    def display_claims(self, data, table):
-        table.setRowCount(len(data))
+    def display_claims(self, data):
+        self.claims_table.setRowCount(len(data))
         for row, claim in enumerate(data):
             for col, item in enumerate(claim):
                 table_item = QTableWidgetItem("" if item is None else str(item))
                 table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-                table.setItem(row, col, table_item)
+                self.claims_table.setItem(row, col, table_item)
 
     def display_contracts(self, data):
         self.contracts_table.setRowCount(len(data))
@@ -304,33 +304,33 @@ class AttachToolDialog(QDialog):
 
         self.setFixedSize(400, 80)
 
-        self.setWindowTitle("Прикрепление инструмента")
+        self.setWindowTitle("Прикрепление компонента")
         self.layout = QVBoxLayout(self)
 
         form_layout = QFormLayout()
-        self.tool_combobox = QComboBox()
-        tool = main_functions.load_tools()
-        tools = [tl[0] for tl in tool]
-        self.tool_combobox.addItems(tools)
+        self.component_combobox = QComboBox()
+        component = main_functions.load_components()
+        components = [tl[0] for tl in component]
+        self.component_combobox.addItems(components)
 
-        form_layout.addRow("Инструмент:", self.tool_combobox)
+        form_layout.addRow("Компоненты:", self.component_combobox)
         self.layout.addLayout(form_layout)
 
         button_layout = QHBoxLayout()
         self.save_button = QPushButton("Сохранить")
-        self.save_button.clicked.connect(self.save_tool)
+        self.save_button.clicked.connect(self.save_component)
         button_layout.addWidget(self.save_button)
         self.layout.addLayout(button_layout)
 
-    def save_tool(self):
-        tool_name = self.tool_combobox.currentText()
-        tool_id = main_functions.tool_definition(Tool(name=tool_name))
-        toolused = ToolUsed(contract_id=self.contract_id, tool_id=tool_id)
-        response = main_functions.add_tool(toolused)
+    def save_component(self):
+        component_name = self.component_combobox.currentText()
+        component_id = main_functions.tool_definition(Tool(name=component_name))
+        componentused = ToolUsed(contract_id=self.contract_id, tool_id=component_id)
+        response = main_functions.add_component(componentused)
         if response == 200:
-            QMessageBox.information(self, "Успех", "Инструмент прикреплен")
+            QMessageBox.information(self, "Успех", "Компонент прикреплен")
             self.accept()
             self.parent().show_contracts()
         else:
-            QMessageBox.warning(self, "Ошибка", "Не удалось прикрепить инструмент")
+            QMessageBox.warning(self, "Ошибка", "Не удалось прикрепить компонент")
             self.reject()
